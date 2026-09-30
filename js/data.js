@@ -1,86 +1,86 @@
-/**
+﻿/**
  * ====================================================================
- * PROYECTO INFOVIS 2026 - VISUALIZACIÓN DE CONSUMO MUNDIAL DE COCA-COLA
- * Módulo de Datos: Martín Concha (Estructura & Nomenclatura Geográfica)
+ * PROYECTO INFOVIS 2026 - VISUALIZACIÃ“N DE CONSUMO MUNDIAL DE COCA-COLA
+ * MÃ³dulo de Datos: MartÃ­n Concha (Estructura & Nomenclatura GeogrÃ¡fica)
  * ====================================================================
- * Contiene el registro de nombres completos en español y continentes
- * para los 180 países del mapa SVG.
+ * Contiene el registro de nombres completos en espaÃ±ol y continentes
+ * para los 180 paÃ­ses del mapa SVG.
  * 
- * Los datos numéricos de consumo permanecen vacíos en `countries: {}`
- * para ser definidos por Martín Concha.
+ * Los datos numÃ©ricos de consumo permanecen vacÃ­os en `countries: {}`
+ * para ser definidos por MartÃ­n Concha.
  */
 
 const CocaColaData = {
-    // Categorías de consumo para la visualización
+    // CategorÃ­as de consumo para la visualizaciÃ³n
     TIERS: {
-        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '> 400 porciones/año', color: '#E50914' },
-        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '250 - 399 porciones/año', color: '#FF4D4D' },
-        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '120 - 249 porciones/año', color: '#FFA94D' },
-        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '40 - 119 porciones/año', color: '#FFE066' },
-        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '0 - 39 porciones/año',   color: '#6B7280' }
+        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '> 400 porciones/aÃ±o', color: '#E50914' },
+        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '250 - 399 porciones/aÃ±o', color: '#FF4D4D' },
+        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '120 - 249 porciones/aÃ±o', color: '#FFA94D' },
+        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '40 - 119 porciones/aÃ±o', color: '#FFE066' },
+        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '0 - 39 porciones/aÃ±o',   color: '#6B7280' }
     },
 
-    // Diccionario completo de nombres de países en español (180 países del SVG)
+    // Diccionario completo de nombres de paÃ­ses en espaÃ±ol (180 paÃ­ses del SVG)
     countryNames: {
-        ae: 'Emiratos Árabes Unidos', af: 'Afganistán', al: 'Albania', am: 'Armenia',
-        ao: 'Angola', ar: 'Argentina', at: 'Austria', au: 'Australia', az: 'Azerbaiyán',
-        ba: 'Bosnia y Herzegovina', bd: 'Bangladés', be: 'Bélgica', bf: 'Burkina Faso',
-        bg: 'Bulgaria', bi: 'Burundi', bj: 'Benín', bn: 'Brunéi', bo: 'Bolivia',
-        br: 'Brasil', bs: 'Bahamas', bt: 'Bután', bw: 'Botsuana', by: 'Bielorrusia',
-        bz: 'Belice', ca: 'Canadá', cd: 'República Democrática del Congo',
-        cf: 'República Centroafricana', cg: 'República del Congo', ch: 'Suiza',
-        ci: 'Costa de Marfil', cl: 'Chile', cm: 'Camerún', cn: 'China', co: 'Colombia',
-        cr: 'Costa Rica', cu: 'Cuba', cv: 'Cabo Verde', cy: 'Chipre', cz: 'República Checa',
-        de: 'Alemania', dj: 'Yibuti', dk: 'Dinamarca', dm: 'Dominica', do: 'República Dominicana',
+        ae: 'Emiratos Ãrabes Unidos', af: 'AfganistÃ¡n', al: 'Albania', am: 'Armenia',
+        ao: 'Angola', ar: 'Argentina', at: 'Austria', au: 'Australia', az: 'AzerbaiyÃ¡n',
+        ba: 'Bosnia y Herzegovina', bd: 'BangladÃ©s', be: 'BÃ©lgica', bf: 'Burkina Faso',
+        bg: 'Bulgaria', bi: 'Burundi', bj: 'BenÃ­n', bn: 'BrunÃ©i', bo: 'Bolivia',
+        br: 'Brasil', bs: 'Bahamas', bt: 'ButÃ¡n', bw: 'Botsuana', by: 'Bielorrusia',
+        bz: 'Belice', ca: 'CanadÃ¡', cd: 'RepÃºblica DemocrÃ¡tica del Congo',
+        cf: 'RepÃºblica Centroafricana', cg: 'RepÃºblica del Congo', ch: 'Suiza',
+        ci: 'Costa de Marfil', cl: 'Chile', cm: 'CamerÃºn', cn: 'China', co: 'Colombia',
+        cr: 'Costa Rica', cu: 'Cuba', cv: 'Cabo Verde', cy: 'Chipre', cz: 'RepÃºblica Checa',
+        de: 'Alemania', dj: 'Yibuti', dk: 'Dinamarca', dm: 'Dominica', do: 'RepÃºblica Dominicana',
         dz: 'Argelia', ec: 'Ecuador', ee: 'Estonia', eg: 'Egipto', er: 'Eritrea',
-        es: 'España', et: 'Etiopía', fi: 'Finlandia', fk: 'Islas Malvinas', fr: 'Francia',
-        ga: 'Gabón', gb: 'Reino Unido', ge: 'Georgia', gh: 'Ghana', gl: 'Groenlandia',
+        es: 'EspaÃ±a', et: 'EtiopÃ­a', fi: 'Finlandia', fk: 'Islas Malvinas', fr: 'Francia',
+        ga: 'GabÃ³n', gb: 'Reino Unido', ge: 'Georgia', gh: 'Ghana', gl: 'Groenlandia',
         gm: 'Gambia', gn: 'Guinea', gq: 'Guinea Ecuatorial', gr: 'Grecia', gt: 'Guatemala',
-        gw: 'Guinea-Bisáu', gy: 'Guyana', hn: 'Honduras', hr: 'Croacia', ht: 'Haití',
-        hu: 'Hungría', id: 'Indonesia', ie: 'Irlanda', il: 'Israel', in: 'India',
-        iq: 'Irak', ir: 'Irán', is: 'Islandia', it: 'Italia', jm: 'Jamaica',
-        jo: 'Jordania', jp: 'Japón', ke: 'Kenia', kg: 'Kirguistán', kh: 'Camboya',
+        gw: 'Guinea-BisÃ¡u', gy: 'Guyana', hn: 'Honduras', hr: 'Croacia', ht: 'HaitÃ­',
+        hu: 'HungrÃ­a', id: 'Indonesia', ie: 'Irlanda', il: 'Israel', in: 'India',
+        iq: 'Irak', ir: 'IrÃ¡n', is: 'Islandia', it: 'Italia', jm: 'Jamaica',
+        jo: 'Jordania', jp: 'JapÃ³n', ke: 'Kenia', kg: 'KirguistÃ¡n', kh: 'Camboya',
         km: 'Comoras', kp: 'Corea del Norte', kr: 'Corea del Sur', kw: 'Kuwait',
-        kz: 'Kazajistán', la: 'Laos', lb: 'Líbano', lc: 'Santa Lucía', lk: 'Sri Lanka',
+        kz: 'KazajistÃ¡n', la: 'Laos', lb: 'LÃ­bano', lc: 'Santa LucÃ­a', lk: 'Sri Lanka',
         lr: 'Liberia', ls: 'Lesoto', lt: 'Lituania', lu: 'Luxemburgo', lv: 'Letonia',
         ly: 'Libia', ma: 'Marruecos', md: 'Moldavia', me: 'Montenegro', mg: 'Madagascar',
-        mk: 'Macedonia del Norte', ml: 'Malí', mm: 'Myanmar (Birmania)', mn: 'Mongolia',
+        mk: 'Macedonia del Norte', ml: 'MalÃ­', mm: 'Myanmar (Birmania)', mn: 'Mongolia',
         mr: 'Mauritania', mt: 'Malta', mu: 'Mauricio', mv: 'Maldivas', mw: 'Malaui',
-        mx: 'México', my: 'Malasia', mz: 'Mozambique', na: 'Namibia', nc: 'Nueva Caledonia',
-        ne: 'Níger', ng: 'Nigeria', ni: 'Nicaragua', nl: 'Países Bajos', no: 'Noruega',
-        np: 'Nepal', nz: 'Nueva Zelanda', om: 'Omán', pa: 'Panamá', pe: 'Perú',
-        pg: 'Papúa Nueva Guinea', ph: 'Filipinas', pk: 'Pakistán', pl: 'Polonia',
+        mx: 'MÃ©xico', my: 'Malasia', mz: 'Mozambique', na: 'Namibia', nc: 'Nueva Caledonia',
+        ne: 'NÃ­ger', ng: 'Nigeria', ni: 'Nicaragua', nl: 'PaÃ­ses Bajos', no: 'Noruega',
+        np: 'Nepal', nz: 'Nueva Zelanda', om: 'OmÃ¡n', pa: 'PanamÃ¡', pe: 'PerÃº',
+        pg: 'PapÃºa Nueva Guinea', ph: 'Filipinas', pk: 'PakistÃ¡n', pl: 'Polonia',
         pr: 'Puerto Rico', pt: 'Portugal', py: 'Paraguay', qa: 'Catar', ro: 'Rumania',
-        rs: 'Serbia', ru: 'Rusia', rw: 'Ruanda', sa: 'Arabia Saudita', sb: 'Islas Salomón',
-        sc: 'Seychelles', sd: 'Sudán', se: 'Suecia', sg: 'Singapur', si: 'Eslovenia',
+        rs: 'Serbia', ru: 'Rusia', rw: 'Ruanda', sa: 'Arabia Saudita', sb: 'Islas SalomÃ³n',
+        sc: 'Seychelles', sd: 'SudÃ¡n', se: 'Suecia', sg: 'Singapur', si: 'Eslovenia',
         sk: 'Eslovaquia', sl: 'Sierra Leona', sn: 'Senegal', so: 'Somalia',
-        somaliland: 'Somalilandia', sr: 'Surinam', ss: 'Sudán del Sur',
-        st: 'Santo Tomé y Príncipe', sv: 'El Salvador', sy: 'Siria',
+        somaliland: 'Somalilandia', sr: 'Surinam', ss: 'SudÃ¡n del Sur',
+        st: 'Santo TomÃ© y PrÃ­ncipe', sv: 'El Salvador', sy: 'Siria',
         sz: 'Suazilandia (Esuatini)', td: 'Chad', tg: 'Togo', th: 'Tailandia',
-        tj: 'Tayikistán', tm: 'Turkmenistán', tn: 'Túnez', tr: 'Turquía',
-        tt: 'Trinidad y Tobago', tw: 'Taiwán', tz: 'Tanzania', ua: 'Ucrania',
-        ug: 'Uganda', us: 'Estados Unidos', uy: 'Uruguay', uz: 'Uzbekistán',
+        tj: 'TayikistÃ¡n', tm: 'TurkmenistÃ¡n', tn: 'TÃºnez', tr: 'TurquÃ­a',
+        tt: 'Trinidad y Tobago', tw: 'TaiwÃ¡n', tz: 'Tanzania', ua: 'Ucrania',
+        ug: 'Uganda', us: 'Estados Unidos', uy: 'Uruguay', uz: 'UzbekistÃ¡n',
         vc: 'San Vicente y las Granadinas', ve: 'Venezuela', vn: 'Vietnam',
-        vu: 'Vanuatu', ye: 'Yemen', za: 'Sudáfrica', zm: 'Zambia', zw: 'Zimbabue'
+        vu: 'Vanuatu', ye: 'Yemen', za: 'SudÃ¡frica', zm: 'Zambia', zw: 'Zimbabue'
     },
 
-    // Continente asignado para cada país del SVG
+    // Continente asignado para cada paÃ­s del SVG
     continentMapping: {
-        // América del Sur
-        ar: 'América del Sur', bo: 'América del Sur', br: 'América del Sur',
-        cl: 'América del Sur', co: 'América del Sur', ec: 'América del Sur',
-        fk: 'América del Sur', gy: 'América del Sur', pe: 'América del Sur',
-        py: 'América del Sur', sr: 'América del Sur', uy: 'América del Sur',
-        ve: 'América del Sur',
+        // AmÃ©rica del Sur
+        ar: 'AmÃ©rica del Sur', bo: 'AmÃ©rica del Sur', br: 'AmÃ©rica del Sur',
+        cl: 'AmÃ©rica del Sur', co: 'AmÃ©rica del Sur', ec: 'AmÃ©rica del Sur',
+        fk: 'AmÃ©rica del Sur', gy: 'AmÃ©rica del Sur', pe: 'AmÃ©rica del Sur',
+        py: 'AmÃ©rica del Sur', sr: 'AmÃ©rica del Sur', uy: 'AmÃ©rica del Sur',
+        ve: 'AmÃ©rica del Sur',
 
-        // América del Norte / Central / Caribe
-        bs: 'América del Norte', bz: 'América del Norte', ca: 'América del Norte',
-        cr: 'América del Norte', cu: 'América del Norte', dm: 'América del Norte',
-        do: 'América del Norte', gl: 'América del Norte', gt: 'América del Norte',
-        hn: 'América del Norte', ht: 'América del Norte', jm: 'América del Norte',
-        lc: 'América del Norte', mx: 'América del Norte', ni: 'América del Norte',
-        pa: 'América del Norte', pr: 'América del Norte', sv: 'América del Norte',
-        tt: 'América del Norte', us: 'América del Norte', vc: 'América del Norte',
+        // AmÃ©rica del Norte / Central / Caribe
+        bs: 'AmÃ©rica del Norte', bz: 'AmÃ©rica del Norte', ca: 'AmÃ©rica del Norte',
+        cr: 'AmÃ©rica del Norte', cu: 'AmÃ©rica del Norte', dm: 'AmÃ©rica del Norte',
+        do: 'AmÃ©rica del Norte', gl: 'AmÃ©rica del Norte', gt: 'AmÃ©rica del Norte',
+        hn: 'AmÃ©rica del Norte', ht: 'AmÃ©rica del Norte', jm: 'AmÃ©rica del Norte',
+        lc: 'AmÃ©rica del Norte', mx: 'AmÃ©rica del Norte', ni: 'AmÃ©rica del Norte',
+        pa: 'AmÃ©rica del Norte', pr: 'AmÃ©rica del Norte', sv: 'AmÃ©rica del Norte',
+        tt: 'AmÃ©rica del Norte', us: 'AmÃ©rica del Norte', vc: 'AmÃ©rica del Norte',
 
         // Europa
         al: 'Europa', at: 'Europa', ba: 'Europa', be: 'Europa', bg: 'Europa',
@@ -92,19 +92,19 @@ const CocaColaData = {
         no: 'Europa', pl: 'Europa', pt: 'Europa', ro: 'Europa', rs: 'Europa',
         ru: 'Europa', se: 'Europa', si: 'Europa', sk: 'Europa', ua: 'Europa',
 
-        // África
-        ao: 'África', bf: 'África', bi: 'África', bj: 'África', bw: 'África',
-        cd: 'África', cf: 'África', cg: 'África', ci: 'África', cm: 'África',
-        cv: 'África', dj: 'África', dz: 'África', eg: 'África', er: 'África',
-        et: 'África', ga: 'África', gh: 'África', gm: 'África', gn: 'África',
-        gq: 'África', gw: 'África', ke: 'África', km: 'África', lr: 'África',
-        ls: 'África', ly: 'África', ma: 'África', mg: 'África', ml: 'África',
-        mr: 'África', mu: 'África', mw: 'África', mz: 'África', na: 'África',
-        ne: 'África', ng: 'África', rw: 'África', sc: 'África', sd: 'África',
-        sl: 'África', sn: 'África', so: 'África', somaliland: 'África',
-        ss: 'África', st: 'África', sz: 'África', td: 'África', tg: 'África',
-        tn: 'África', tz: 'África', ug: 'África', za: 'África', zm: 'África',
-        zw: 'África',
+        // Ãfrica
+        ao: 'Ãfrica', bf: 'Ãfrica', bi: 'Ãfrica', bj: 'Ãfrica', bw: 'Ãfrica',
+        cd: 'Ãfrica', cf: 'Ãfrica', cg: 'Ãfrica', ci: 'Ãfrica', cm: 'Ãfrica',
+        cv: 'Ãfrica', dj: 'Ãfrica', dz: 'Ãfrica', eg: 'Ãfrica', er: 'Ãfrica',
+        et: 'Ãfrica', ga: 'Ãfrica', gh: 'Ãfrica', gm: 'Ãfrica', gn: 'Ãfrica',
+        gq: 'Ãfrica', gw: 'Ãfrica', ke: 'Ãfrica', km: 'Ãfrica', lr: 'Ãfrica',
+        ls: 'Ãfrica', ly: 'Ãfrica', ma: 'Ãfrica', mg: 'Ãfrica', ml: 'Ãfrica',
+        mr: 'Ãfrica', mu: 'Ãfrica', mw: 'Ãfrica', mz: 'Ãfrica', na: 'Ãfrica',
+        ne: 'Ãfrica', ng: 'Ãfrica', rw: 'Ãfrica', sc: 'Ãfrica', sd: 'Ãfrica',
+        sl: 'Ãfrica', sn: 'Ãfrica', so: 'Ãfrica', somaliland: 'Ãfrica',
+        ss: 'Ãfrica', st: 'Ãfrica', sz: 'Ãfrica', td: 'Ãfrica', tg: 'Ãfrica',
+        tn: 'Ãfrica', tz: 'Ãfrica', ug: 'Ãfrica', za: 'Ãfrica', zm: 'Ãfrica',
+        zw: 'Ãfrica',
 
         // Asia
         ae: 'Asia', af: 'Asia', am: 'Asia', az: 'Asia', bd: 'Asia', bn: 'Asia',
@@ -116,31 +116,31 @@ const CocaColaData = {
         sy: 'Asia', th: 'Asia', tj: 'Asia', tm: 'Asia', tr: 'Asia', tw: 'Asia',
         uz: 'Asia', vn: 'Asia', ye: 'Asia',
 
-        // Oceanía
-        au: 'Oceanía', nc: 'Oceanía', nz: 'Oceanía', pg: 'Oceanía', sb: 'Oceanía',
-        vu: 'Oceanía'
+        // OceanÃ­a
+        au: 'OceanÃ­a', nc: 'OceanÃ­a', nz: 'OceanÃ­a', pg: 'OceanÃ­a', sb: 'OceanÃ­a',
+        vu: 'OceanÃ­a'
     },
 
     /**
      * DICCIONARIO DE DATOS:
-     * Reservado para que Martín Concha añada las métricas de consumo.
+     * Reservado para que MartÃ­n Concha aÃ±ada las mÃ©tricas de consumo.
      */
     countries: {},
 
     /**
-     * Resuelve el nombre oficial en español y el continente de cualquier país.
-     * NUNCA devuelve la abreviación ISO.
+     * Resuelve el nombre oficial en espaÃ±ol y el continente de cualquier paÃ­s.
+     * NUNCA devuelve la abreviaciÃ³n ISO.
      */
     getCountry: function (code) {
         if (!code) return null;
         const normalized = code.toLowerCase().trim();
 
-        // 1. Si Martín ya añadió datos para este país, usarlos
+        // 1. Si MartÃ­n ya aÃ±adiÃ³ datos para este paÃ­s, usarlos
         if (this.countries[normalized]) {
             return this.countries[normalized];
         }
 
-        // 2. Obtener nombre en español del diccionario
+        // 2. Obtener nombre en espaÃ±ol del diccionario
         let fullName = this.countryNames[normalized];
 
         // 3. Fallback inteligente usando Intl.DisplayNames del navegador
@@ -151,9 +151,9 @@ const CocaColaData = {
             } catch (e) {}
         }
 
-        // Si aún así no estuviese, formatear nombre limpio (nunca sigla suelta)
+        // Si aÃºn asÃ­ no estuviese, formatear nombre limpio (nunca sigla suelta)
         if (!fullName) {
-            fullName = `País (${normalized.toUpperCase()})`;
+            fullName = `PaÃ­s (${normalized.toUpperCase()})`;
         }
 
         const continent = this.continentMapping[normalized] || 'Por definir';
@@ -161,19 +161,19 @@ const CocaColaData = {
         return {
             id: normalized,
             name: fullName,
-            flag: '🏳️',
+            flag: 'ðŸ³ï¸',
             continent: continent,
             rank: '--',
             consumptionServings: '--',
             consumptionLiters: '--',
             level: null,
-            fact: 'Espacio reservado para la información que añadirá Martín Concha.'
+            fact: 'Espacio reservado para la informaciÃ³n que aÃ±adirÃ¡ MartÃ­n Concha.'
         };
     },
 
     getTierConfig: function (levelKey) {
-        if (!levelKey) return { label: 'Sin datos aún', color: '#3A2E2E' };
-        return this.TIERS[levelKey] || { label: 'Sin datos aún', color: '#3A2E2E' };
+        if (!levelKey) return { label: 'Sin datos aÃºn', color: '#3A2E2E' };
+        return this.TIERS[levelKey] || { label: 'Sin datos aÃºn', color: '#3A2E2E' };
     },
 
     getColorByLevel: function (levelKey) {
@@ -183,8 +183,8 @@ const CocaColaData = {
     getTopCountries: function (limit = 5) {
         return Array.from({ length: limit }, (_, i) => ({
             id: `slot_${i + 1}`,
-            name: `[País Top #${i + 1}]`,
-            flag: '🏳️',
+            name: `[PaÃ­s Top #${i + 1}]`,
+            flag: 'ðŸ³ï¸',
             rank: i + 1,
             consumptionServings: '--',
             consumptionLiters: '--',
