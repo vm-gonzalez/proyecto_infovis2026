@@ -345,6 +345,21 @@ body {
     box-sizing: border-box;
 }
 
+.data-source-note {
+    margin: 0;
+    padding: 8px 20px 10px;
+    background: rgba(0, 0, 0, 0.45);
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.data-source-note a {
+    color: var(--text-secondary);
+    text-decoration: underline;
+}
+
 .legend-title {
     font-size: 0.8rem;
     font-weight: 700;
@@ -627,6 +642,17 @@ body {
 
 .tooltip-flag {
     font-size: 1.8rem;
+}
+
+/* Bandera como imagen (proporción fija 3:2); se escala con el font-size de su contenedor */
+.flag-img {
+    display: inline-block;
+    width: 1.2em;
+    height: 0.8em;
+    object-fit: cover;
+    vertical-align: middle;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .tooltip-titles {

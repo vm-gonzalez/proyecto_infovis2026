@@ -6,7 +6,7 @@
  * Gestiona:
  * - Renderizado base del mapa y sus recuadros informativos.
  * - Efectos visuales de hover en cada país (sin datos hardcodeados).
- * - Tooltip con los espacios/recuadros preparados para la información de Martín.
+ * - Tooltip con los espacios/recuadros preparados para la información de Sebastián.
  * - Filtrado visual por continentes.
  */
 
@@ -56,9 +56,10 @@ const MapModule = {
             path.setAttribute('data-continent', continent);
             path.classList.add('country-path');
             
-            // Si Martín definió un nivel, usar su color; si no, color base uniforme
-            const color = countryData && countryData.level ? window.CocaColaData.getColorByLevel(countryData.level) : '#2A2020';
-            path.style.fill = color;
+            // Color según el nivel de consumo del dataset; países sin dato quedan con color base
+            const level = countryData && countryData.level ? countryData.level : 'sin_datos';
+            path.setAttribute('data-level', level);
+            path.style.fill = window.CocaColaData ? window.CocaColaData.getColorByLevel(countryData?.level) : '#2A2020';
         });
     },
 
@@ -85,7 +86,7 @@ const MapModule = {
                 this.showTooltip(countryData);
                 this.updateTooltipPosition(e);
 
-                // 3. Invocar al módulo de audio de Sebastián (recibirá el país)
+                // 3. Invocar al módulo de audio de Martín (recibirá el país)
                 if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
                     window.SoundEngine.playBurpForCountry(countryData);
                 }
@@ -157,17 +158,17 @@ const MapModule = {
             <div class="tooltip-metrics">
                 <div class="metric-item placeholder-box">
                     <span class="metric-value">${servings}</span>
-                    <span class="metric-label">[Porciones 8oz / año]</span>
+                    <span class="metric-label">Porciones de 8 oz por persona / año</span>
                 </div>
                 <div class="metric-item placeholder-box">
                     <span class="metric-value">${liters}</span>
-                    <span class="metric-label">[Litros per cápita]</span>
+                    <span class="metric-label">Litros por persona / año</span>
                 </div>
             </div>
 
             <div class="tooltip-fact placeholder-box">
                 <span class="placeholder-tag">[Recuadro de Información]</span>
-                <p>${data.fact || 'Espacio reservado para la información de Martín Concha.'}</p>
+                <p>${data.fact || 'Espacio reservado para la información de Sebastián Valencia.'}</p>
             </div>
         `;
 
@@ -293,16 +294,16 @@ const MapModule = {
             <div class="featured-stat-row">
                 <div class="featured-stat placeholder-box">
                     <span class="f-num">${servings}</span>
-                    <span class="f-lbl">[Porciones 8oz / año]</span>
+                    <span class="f-lbl">Porciones de 8 oz por persona / año</span>
                 </div>
                 <div class="featured-stat placeholder-box">
                     <span class="f-num">${liters}</span>
-                    <span class="f-lbl">[Litros anuales]</span>
+                    <span class="f-lbl">Litros por persona / año</span>
                 </div>
             </div>
             <div class="featured-fact placeholder-box">
                 <span class="placeholder-tag">[Recuadro de Información]</span>
-                <p>${data.fact || 'Espacio reservado para la información de Martín Concha.'}</p>
+                <p>${data.fact || 'Espacio reservado para la información de Sebastián Valencia.'}</p>
             </div>
         `;
     }

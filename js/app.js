@@ -14,37 +14,43 @@ document.addEventListener('DOMContentLoaded', () => {
         window.MapModule.init();
     }
 
-    // 2. Renderizar los 5 recuadros vacíos del Top en el panel lateral
-    renderTopRankingPlaceholders();
+    // 2. Renderizar el Top 5 de consumo en el panel lateral
+    renderTopRanking();
 
     // 3. Inicializar burbujas sutiles de fondo
     createCarbonationBubbles();
 });
 
 /**
- * Renderiza los 5 recuadros/espacios contenedores del Top de países.
+ * Renderiza el Top 5 de países según el dataset de consumo.
+ * Si el dataset no está disponible, deja los recuadros vacíos.
  */
-function renderTopRankingPlaceholders() {
+function renderTopRanking() {
     const listContainer = document.getElementById('top-ranking-list');
     if (!listContainer) return;
 
-    const placeholderSlots = [
-        { pos: 1, label: '[País Top #1 por definir]' },
-        { pos: 2, label: '[País Top #2 por definir]' },
-        { pos: 3, label: '[País Top #3 por definir]' },
-        { pos: 4, label: '[País Top #4 por definir]' },
-        { pos: 5, label: '[País Top #5 por definir]' }
-    ];
+    const top = window.CocaColaData ? window.CocaColaData.getTopCountries(5) : [];
 
-    listContainer.innerHTML = placeholderSlots.map(slot => `
-        <li class="ranking-item placeholder-ranking">
-            <span class="ranking-pos">#${slot.pos}</span>
-            <span class="ranking-flag">🏳️</span>
+    if (top.length === 0) {
+        listContainer.innerHTML = `
+            <li class="ranking-item placeholder-ranking">
+                <div class="ranking-info">
+                    <span class="ranking-name">Sin datos de consumo disponibles</span>
+                </div>
+            </li>
+        `;
+        return;
+    }
+
+    listContainer.innerHTML = top.map(country => `
+        <li class="ranking-item">
+            <span class="ranking-pos">#${country.rank}</span>
+            <span class="ranking-flag">${country.flag}</span>
             <div class="ranking-info">
-                <span class="ranking-name">${slot.label}</span>
-                <span class="ranking-servings">[--- porciones/año]</span>
+                <span class="ranking-name">${country.name}</span>
+                <span class="ranking-servings">${country.consumptionServings} porciones/año</span>
             </div>
-            <span class="ranking-pill placeholder-pill">--- L</span>
+            <span class="ranking-pill">${country.consumptionLiters} L</span>
         </li>
     `).join('');
 }
