@@ -1,12 +1,12 @@
-/**
+﻿/**
  * ====================================================================
- * PROYECTO INFOVIS 2026 - VISUALIZACIÓN DE CONSUMO MUNDIAL DE COCA-COLA
- * Módulo de Mapa e Interacción Visual: Vicente Meza (dev 1 - Frontend Lead)
+ * PROYECTO INFOVIS 2026 - VISUALIZACIÃ“N DE CONSUMO MUNDIAL DE COCA-COLA
+ * MÃ³dulo de Mapa e InteracciÃ³n Visual: Vicente Meza (dev 1 - Frontend Lead)
  * ====================================================================
  * Gestiona:
  * - Renderizado base del mapa y sus recuadros informativos.
- * - Efectos visuales de hover en cada país (sin datos hardcodeados).
- * - Tooltip con los espacios/recuadros preparados para la información de Martín.
+ * - Efectos visuales de hover en cada paÃ­s (sin datos hardcodeados).
+ * - Tooltip con los espacios/recuadros preparados para la informaciÃ³n de MartÃ­n.
  * - Filtrado visual por continentes.
  */
 
@@ -21,14 +21,14 @@ const MapModule = {
         this.tooltipElement = document.getElementById('country-tooltip');
 
         if (!this.svgElement) {
-            console.error('No se encontró el elemento SVG #world-map en el DOM.');
+            console.error('No se encontrÃ³ el elemento SVG #world-map en el DOM.');
             return;
         }
 
         // 1. Configurar paths del SVG con color base neutro y atributos
         this.setupCountryPaths();
 
-        // 2. Configurar eventos de hover sin acumulación de marcas
+        // 2. Configurar eventos de hover sin acumulaciÃ³n de marcas
         this.setupEventListeners();
 
         // 3. Configurar filtros de continentes
@@ -56,7 +56,7 @@ const MapModule = {
             path.setAttribute('data-continent', continent);
             path.classList.add('country-path');
             
-            // Si Martín definió un nivel, usar su color; si no, color base uniforme
+            // Si MartÃ­n definiÃ³ un nivel, usar su color; si no, color base uniforme
             const color = countryData && countryData.level ? window.CocaColaData.getColorByLevel(countryData.level) : '#2A2020';
             path.style.fill = color;
         });
@@ -78,14 +78,14 @@ const MapModule = {
                 const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
                 if (!countryData) return;
 
-                // 1. Iluminar país en hover
+                // 1. Iluminar paÃ­s en hover
                 this.highlightCountry(countryId);
 
                 // 2. Mostrar recuadros en el Tooltip
                 this.showTooltip(countryData);
                 this.updateTooltipPosition(e);
 
-                // 3. Invocar al módulo de audio de Sebastián (recibirá el país)
+                // 3. Invocar al mÃ³dulo de audio de SebastiÃ¡n (recibirÃ¡ el paÃ­s)
                 if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
                     window.SoundEngine.playBurpForCountry(countryData);
                 }
@@ -143,7 +143,7 @@ const MapModule = {
 
         this.tooltipElement.innerHTML = `
             <div class="tooltip-header">
-                <span class="tooltip-flag">${data.flag || '🏳️'}</span>
+                <span class="tooltip-flag">${data.flag || 'ðŸ³ï¸'}</span>
                 <div class="tooltip-titles">
                     <h3 class="tooltip-country-name">${data.name}</h3>
                     <span class="tooltip-continent">${data.continent}</span>
@@ -157,17 +157,17 @@ const MapModule = {
             <div class="tooltip-metrics">
                 <div class="metric-item placeholder-box">
                     <span class="metric-value">${servings}</span>
-                    <span class="metric-label">[Porciones 8oz / año]</span>
+                    <span class="metric-label">[Porciones 8oz / aÃ±o]</span>
                 </div>
                 <div class="metric-item placeholder-box">
                     <span class="metric-value">${liters}</span>
-                    <span class="metric-label">[Litros per cápita]</span>
+                    <span class="metric-label">[Litros per cÃ¡pita]</span>
                 </div>
             </div>
 
             <div class="tooltip-fact placeholder-box">
-                <span class="placeholder-tag">[Recuadro de Información]</span>
-                <p>${data.fact || 'Espacio reservado para la información de Martín Concha.'}</p>
+                <span class="placeholder-tag">[Recuadro de InformaciÃ³n]</span>
+                <p>${data.fact || 'Espacio reservado para la informaciÃ³n de MartÃ­n Concha.'}</p>
             </div>
         `;
 
@@ -233,7 +233,7 @@ const MapModule = {
         const banner = document.getElementById('continent-banner-info');
         if (banner) {
             if (continent === 'Todos') {
-                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver su recuadro</span>`;
+                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un paÃ­s para ver su recuadro</span>`;
             } else {
                 banner.innerHTML = `<span>Continente seleccionado: <strong>${continent}</strong></span>`;
             }
@@ -273,7 +273,7 @@ const MapModule = {
     },
 
     /**
-     * Actualiza el recuadro lateral para el país seleccionado.
+     * Actualiza el recuadro lateral para el paÃ­s seleccionado.
      */
     updateSidebarCountryInfo: function (data) {
         const infoBox = document.getElementById('featured-country-card');
@@ -284,7 +284,7 @@ const MapModule = {
 
         infoBox.innerHTML = `
             <div class="featured-header">
-                <span class="featured-flag">${data.flag || '🏳️'}</span>
+                <span class="featured-flag">${data.flag || 'ðŸ³ï¸'}</span>
                 <div>
                     <h4>${data.name}</h4>
                     <span class="featured-sub">${data.continent}</span>
@@ -293,7 +293,7 @@ const MapModule = {
             <div class="featured-stat-row">
                 <div class="featured-stat placeholder-box">
                     <span class="f-num">${servings}</span>
-                    <span class="f-lbl">[Porciones 8oz / año]</span>
+                    <span class="f-lbl">[Porciones 8oz / aÃ±o]</span>
                 </div>
                 <div class="featured-stat placeholder-box">
                     <span class="f-num">${liters}</span>
@@ -301,8 +301,8 @@ const MapModule = {
                 </div>
             </div>
             <div class="featured-fact placeholder-box">
-                <span class="placeholder-tag">[Recuadro de Información]</span>
-                <p>${data.fact || 'Espacio reservado para la información de Martín Concha.'}</p>
+                <span class="placeholder-tag">[Recuadro de InformaciÃ³n]</span>
+                <p>${data.fact || 'Espacio reservado para la informaciÃ³n de MartÃ­n Concha.'}</p>
             </div>
         `;
     }
