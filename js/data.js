@@ -4,16 +4,16 @@
  * Módulo de Datos: Sebastián Valencia (Estructura & Nomenclatura Geográfica)
  * ====================================================================
  * Contiene el registro de nombres completos en español y continentes
- * para los 180 países del mapa SVG.
- * 
- * Los datos numéricos de consumo permanecen vacíos en `countries: {}`
- * para ser definidos por Sebastián Valencia.
+ * para los 180 países del mapa SVG, y cruza cada país con el dataset de
+ * consumo per cápita (data/coca-cola-per-capita.js).
+ *
+ * Países sin dato en la fuente se devuelven con `hasData: false` y "Sin datos".
  */
 
 const CocaColaData = {
     // Categorías de consumo para la visualización
     TIERS: {
-        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '> 400 porciones/año', color: '#E50914' },
+        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 400 porciones/año', color: '#E50914' },
         alto:     { id: 'alto',     label: 'Consumo Alto',     range: '250 - 399 porciones/año', color: '#FF4D4D' },
         medio:    { id: 'medio',    label: 'Consumo Medio',    range: '120 - 249 porciones/año', color: '#FFA94D' },
         bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '40 - 119 porciones/año', color: '#FFE066' },
@@ -121,29 +121,76 @@ const CocaColaData = {
         vu: 'Oceanía'
     },
 
-    /**
-     * DICCIONARIO DE DATOS:
-     * Reservado para que Sebastián Valencia añada las métricas de consumo.
-     */
-    countries: {},
+    // 1 porción = 8 onzas líquidas EE.UU. = 0,2365882 litros
+    LITERS_PER_SERVING: 0.2365882,
+    // Año que se usa para colorear el mapa y armar el ranking
+    DATA_YEAR: 2011,
+    NO_DATA_COLOR: '#2A2020',
+
+    _ranking: null,
 
     /**
-     * Resuelve el nombre oficial en español y el continente de cualquier país.
-     * NUNCA devuelve la abreviación ISO.
+     * Dataset cargado desde data/coca-cola-per-capita.js.
+     * Si el archivo no se cargó, el mapa funciona igual, todo como "Sin datos".
+     */
+    getDataset: function () {
+        return window.CocaColaDataset || null;
+    },
+
+    isValidNumber: function (value) {
+        return typeof value === 'number' && Number.isFinite(value);
+    },
+
+    getLevel: function (servings) {
+        if (!this.isValidNumber(servings)) return null;
+        if (servings >= 400) return 'muy_alto';
+        if (servings >= 250) return 'alto';
+        if (servings >= 120) return 'medio';
+        if (servings >= 40) return 'bajo';
+        return 'muy_bajo';
+    },
+
+    /**
+     * Devuelve el HTML de la bandera como imagen (flagcdn.com), porque Windows
+     * no dibuja los emojis de banderas. Si la imagen no carga (sin internet o
+     * código inexistente), se reemplaza por la bandera blanca 🏳️.
+     */
+    getFlag: function (code) {
+        if (!/^[a-z]{2}$/.test(code)) return '🏳️';
+        return `<img class="flag-img" src="https://flagcdn.com/w80/${code}.png" alt="" loading="lazy" onerror="this.replaceWith('🏳️')">`;
+    },
+
+    formatNumber: function (value, decimals = 0) {
+        return value.toLocaleString('es-CL', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    },
+
+    /**
+     * Códigos de los países con dato válido en DATA_YEAR, de mayor a menor consumo.
+     */
+    getRanking: function () {
+        if (this._ranking) return this._ranking;
+        const dataset = this.getDataset();
+        const year = this.DATA_YEAR;
+        if (!dataset || !dataset.countries) return [];
+
+        this._ranking = Object.keys(dataset.countries)
+            .filter(code => this.isValidNumber(dataset.countries[code]?.[year]))
+            .sort((a, b) => dataset.countries[b][year] - dataset.countries[a][year]);
+        return this._ranking;
+    },
+
+    /**
+     * Resuelve el nombre oficial en español y el continente de cualquier país,
+     * junto con su consumo si el dataset lo incluye. NUNCA devuelve la abreviación ISO.
      */
     getCountry: function (code) {
         if (!code) return null;
         const normalized = code.toLowerCase().trim();
 
-        // 1. Si Sebastián ya añadió datos para este país, usarlos
-        if (this.countries[normalized]) {
-            return this.countries[normalized];
-        }
-
-        // 2. Obtener nombre en español del diccionario
+        // 1. Obtener nombre en español del diccionario
         let fullName = this.countryNames[normalized];
 
-        // 3. Fallback inteligente usando Intl.DisplayNames del navegador
+        // 2. Fallback inteligente usando Intl.DisplayNames del navegador
         if (!fullName) {
             try {
                 const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
@@ -156,40 +203,64 @@ const CocaColaData = {
             fullName = `País (${normalized.toUpperCase()})`;
         }
 
-        const continent = this.continentMapping[normalized] || 'Por definir';
-
-        return {
+        const base = {
             id: normalized,
             name: fullName,
-            flag: '🏳️',
-            continent: continent,
-            rank: '--',
-            consumptionServings: '--',
-            consumptionLiters: '--',
-            level: null,
-            fact: 'Espacio reservado para la información que añadirá Sebastián Valencia.'
+            flag: this.getFlag(normalized),
+            continent: this.continentMapping[normalized] || 'Por definir'
+        };
+
+        // 3. Buscar el consumo en el dataset
+        const dataset = this.getDataset();
+        const record = dataset?.countries?.[normalized];
+        const servings = record?.[this.DATA_YEAR];
+
+        if (!this.isValidNumber(servings)) {
+            return {
+                ...base,
+                hasData: false,
+                rank: '--',
+                servings: null,
+                consumptionServings: 'Sin datos',
+                consumptionLiters: 'Sin datos',
+                level: null,
+                fact: dataset
+                    ? `The Coca-Cola Company no publica el consumo per cápita de este país en su tabla de ${dataset.source.year}.`
+                    : 'No se pudo cargar el dataset de consumo.'
+            };
+        }
+
+        const history = dataset.source.years
+            .map(year => `${year}: ${this.isValidNumber(record[year]) ? this.formatNumber(record[year]) : 'N/D'}`)
+            .join(' · ');
+        const worldAvg = dataset.worldwide?.[this.DATA_YEAR];
+        const worldText = this.isValidNumber(worldAvg)
+            ? ` Promedio mundial ${this.DATA_YEAR}: ${this.formatNumber(worldAvg)}.`
+            : '';
+
+        return {
+            ...base,
+            hasData: true,
+            rank: this.getRanking().indexOf(normalized) + 1,
+            servings: servings,
+            consumptionServings: this.formatNumber(servings),
+            consumptionLiters: this.formatNumber(servings * this.LITERS_PER_SERVING, 1),
+            level: this.getLevel(servings),
+            fact: `Porciones de 8 oz por persona — ${history}.${worldText}`
         };
     },
 
     getTierConfig: function (levelKey) {
-        if (!levelKey) return { label: 'Sin datos aún', color: '#3A2E2E' };
-        return this.TIERS[levelKey] || { label: 'Sin datos aún', color: '#3A2E2E' };
+        if (!levelKey) return { label: 'Sin datos', color: this.NO_DATA_COLOR };
+        return this.TIERS[levelKey] || { label: 'Sin datos', color: this.NO_DATA_COLOR };
     },
 
     getColorByLevel: function (levelKey) {
-        return levelKey ? (this.TIERS[levelKey]?.color || '#2A2020') : '#2A2020';
+        return levelKey ? (this.TIERS[levelKey]?.color || this.NO_DATA_COLOR) : this.NO_DATA_COLOR;
     },
 
     getTopCountries: function (limit = 5) {
-        return Array.from({ length: limit }, (_, i) => ({
-            id: `slot_${i + 1}`,
-            name: `[País Top #${i + 1}]`,
-            flag: '🏳️',
-            rank: i + 1,
-            consumptionServings: '--',
-            consumptionLiters: '--',
-            level: null
-        }));
+        return this.getRanking().slice(0, limit).map(code => this.getCountry(code));
     }
 };
 

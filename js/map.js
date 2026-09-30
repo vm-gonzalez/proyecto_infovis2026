@@ -56,9 +56,10 @@ const MapModule = {
             path.setAttribute('data-continent', continent);
             path.classList.add('country-path');
             
-            // Si Sebastián definió un nivel, usar su color; si no, color base uniforme
-            const color = countryData && countryData.level ? window.CocaColaData.getColorByLevel(countryData.level) : '#2A2020';
-            path.style.fill = color;
+            // Color según el nivel de consumo del dataset; países sin dato quedan con color base
+            const level = countryData && countryData.level ? countryData.level : 'sin_datos';
+            path.setAttribute('data-level', level);
+            path.style.fill = window.CocaColaData ? window.CocaColaData.getColorByLevel(countryData?.level) : '#2A2020';
         });
     },
 
@@ -157,11 +158,11 @@ const MapModule = {
             <div class="tooltip-metrics">
                 <div class="metric-item placeholder-box">
                     <span class="metric-value">${servings}</span>
-                    <span class="metric-label">[Porciones 8oz / año]</span>
+                    <span class="metric-label">Porciones de 8 oz por persona / año</span>
                 </div>
                 <div class="metric-item placeholder-box">
                     <span class="metric-value">${liters}</span>
-                    <span class="metric-label">[Litros per cápita]</span>
+                    <span class="metric-label">Litros por persona / año</span>
                 </div>
             </div>
 
@@ -293,11 +294,11 @@ const MapModule = {
             <div class="featured-stat-row">
                 <div class="featured-stat placeholder-box">
                     <span class="f-num">${servings}</span>
-                    <span class="f-lbl">[Porciones 8oz / año]</span>
+                    <span class="f-lbl">Porciones de 8 oz por persona / año</span>
                 </div>
                 <div class="featured-stat placeholder-box">
                     <span class="f-num">${liters}</span>
-                    <span class="f-lbl">[Litros anuales]</span>
+                    <span class="f-lbl">Litros por persona / año</span>
                 </div>
             </div>
             <div class="featured-fact placeholder-box">
