@@ -18,13 +18,13 @@
                 <span class="brand-logo-bottle">🥤</span>
                 <div class="brand-titles">
                     <h1><span class="coca-brand">Coca-Cola</span> &bull; Mapa Global de Consumo</h1>
-                    <p>Visualización interactiva por continentes y países con retroalimentación acústica de consumo</p>
+                    <p>Visualización interactiva por continentes y países</p>
                 </div>
             </div>
             <div class="team-credits">
                 <div class="credit-badge dev1">
-                    <strong>Dev 1 (Tú)</strong>
-                    <span>Frontend & Mapa SVG</span>
+                    <strong>Vicente Meza</strong>
+                    <span>Frontend & Mapa Visual</span>
                 </div>
                 <div class="credit-badge">
                     <strong>Martín Concha</strong>
@@ -32,12 +32,12 @@
                 </div>
                 <div class="credit-badge">
                     <strong>Sebastián Valencia</strong>
-                    <span>Efectos de Eructo (Audio)</span>
+                    <span>Audio & Eructos</span>
                 </div>
             </div>
         </header>
 
-        <!-- Barra de Navegación por Continentes y Controles de Audio -->
+        <!-- Barra de Navegación por Continentes -->
         <section class="toolbar-section">
             <div class="continent-filters">
                 <span class="filter-label">Continentes:</span>
@@ -50,25 +50,9 @@
                 <button class="continent-btn" data-continent="Oceanía">🌏 Oceanía</button>
             </div>
 
-            <div class="audio-controls">
-                <button id="btn-sound-toggle" class="audio-btn" title="Activar o silenciar el sonido de eructos">
-                    <span>🔊</span>
-                    <span>Sonido Activo</span>
-                </button>
-                <div class="volume-wrapper">
-                    <span>Vol:</span>
-                    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.8" title="Volumen general">
-                </div>
-                <button id="btn-test-burp" class="audio-btn" title="Probar sonido de eructo proporcional">
-                    <span>💨</span>
-                    <span>Probar Eructo</span>
-                </button>
-                <div id="sound-wave-indicator" class="audio-wave" title="Indicador de sonido">
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
-                </div>
+            <div class="status-badge-visual">
+                <span class="status-indicator-dot"></span>
+                <span>Modo Interactivo Activo</span>
             </div>
         </section>
 
@@ -77,7 +61,7 @@
             <!-- Panel del Mapa Mundial -->
             <div class="map-panel">
                 <div id="continent-banner-info" class="continent-info-banner">
-                    <span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre cualquier país para ver estadísticas y escuchar su eructo</span>
+                    <span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre cualquier país para ver su información</span>
                 </div>
 
                 <div class="map-view-wrapper">
@@ -489,12 +473,6 @@
 </g>
 </svg>
 
-                    <!-- Controles de Navegación de Mapa -->
-                    <div class="map-nav-overlay">
-                        <button id="btn-zoom-in" class="nav-btn" title="Acercar mapa">+</button>
-                        <button id="btn-zoom-out" class="nav-btn" title="Alejar mapa">-</button>
-                        <button id="btn-reset-map" class="nav-btn" title="Restablecer vista">&#x21bb;</button>
-                    </div>
                 </div>
 
                 <!-- Barra de Leyenda de Consumo (Choropleth) -->
@@ -529,9 +507,9 @@
             <aside class="sidebar-panel">
                 <!-- Podio Top 5 -->
                 <div class="sidebar-card">
-                    <h3>🏆 Top 5 Consumo Global</h3>
+                    <h3>🏆 Top Consumo Global</h3>
                     <ul id="top-ranking-list" class="ranking-list">
-                        <!-- Generado dinámicamente por app.js -->
+                        <!-- Generado dinámicamente -->
                     </ul>
                 </div>
 
@@ -556,21 +534,18 @@
                                 <span class="f-lbl">Litros anuales</span>
                             </div>
                         </div>
-                        <p class="featured-fact">¡Líder absoluto de Sudamérica! Los chilenos beben más de 114 litros de Coca-Cola por persona al año.</p>
+                        <p class="featured-fact">Líder de consumo de Coca-Cola en Sudamérica.</p>
                     </div>
                 </div>
 
-                <!-- Guía del Proyecto InfoVis -->
+                <!-- Guía de Navegación -->
                 <div class="sidebar-card">
-                    <h3>💡 Guía de Interacción</h3>
+                    <h3>💡 Guía Visual</h3>
                     <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 8px;">
-                        <strong>1. Efecto Visual:</strong> Pasa el mouse sobre cualquier país para ver su tarjeta de datos en tiempo real y destacarlo en el mapa.
-                    </p>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 8px;">
-                        <strong>2. Retroalimentación Auditiva:</strong> El eructo suena más largo, grave y fuerte en países de alto consumo (como México o Chile), y más débil y corto en bajo consumo.
+                        <strong>Pasa el mouse:</strong> Coloca el cursor sobre cualquier país del mapa para desplegar su tarjeta con métricas de consumo en tiempo real.
                     </p>
                     <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">
-                        <strong>3. Filtros:</strong> Usa los botones superiores para enfocar continentes específicos o haz clic en los países del Top 5.
+                        <strong>Filtra por continente:</strong> Haz clic en los botones superiores para resaltar una región específica del mundo.
                     </p>
                 </div>
             </aside>
@@ -578,8 +553,8 @@
 
         <!-- Pie de Página -->
         <footer class="main-footer">
-            <span>Proyecto de InfoVis 2026 &bull; Grupo: Dev 1, Martín Concha, Sebastián Valencia</span>
-            <span>Desarrollado con HTML5, CSS3 y JavaScript ES6+ (Web Audio API)</span>
+            <span>Proyecto de InfoVis 2026 &bull; Vicente Meza, Martín Concha, Sebastián Valencia</span>
+            <span>Frontend y Visualización desarrollado por Vicente Meza</span>
         </footer>
     </div>
 

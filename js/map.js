@@ -1,30 +1,24 @@
 /**
  * ====================================================================
  * PROYECTO INFOVIS 2026 - VISUALIZACIÓN DE CONSUMO MUNDIAL DE COCA-COLA
- * Módulo de Mapa e Interacción Visual: Dev 1 (Frontend Lead)
+ * Módulo de Mapa e Interacción Visual: Vicente Meza (dev 1 - Frontend Lead)
  * ====================================================================
  * Gestiona:
- * - Coloreado de países según nivel de consumo (Choropleth).
- * - Agrupación y filtrado por continentes.
- * - Efectos de hover sobre cada país (iluminación, bordes, escala).
- * - Posicionamiento dinámico del tooltip con datos y métricas.
- * - Invocación del sonido de eructo proporcional al consumo.
- * - Controles de zoom y paneo sobre el SVG.
+ * - Coloreado coropleta de países según los datos de Martín Concha.
+ * - Resaltado visual instantáneo al pasar el mouse (hover sin atascos).
+ * - Tooltip informativo flotante que sigue el cursor.
+ * - Invocación del sonido de eructos para Sebastián Valencia.
+ * - Filtrado visual por continentes.
  */
 
 const MapModule = {
     svgElement: null,
     tooltipElement: null,
     activeContinent: 'Todos',
-    activeTier: null,
     currentHoveredCountryId: null,
-    
-    // Configuración de vista original del SVG
-    originalViewBox: { x: 30.767, y: 241.591, width: 784.077, height: 458.627 },
-    currentZoom: 1,
 
     /**
-     * Inicializa el módulo del mapa vinculando el SVG y los eventos de interacción.
+     * Inicializa el mapa y sus listeners.
      */
     init: function () {
         this.svgElement = document.getElementById('world-map');
@@ -35,25 +29,22 @@ const MapModule = {
             return;
         }
 
-        // Configurar atributos iniciales de los países y coloreado
+        // 1. Configurar datos de países en los trazos del SVG
         this.setupCountryPaths();
 
-        // Configurar eventos de interacción en el mapa
+        // 2. Configurar eventos de hover limpios e instantáneos
         this.setupEventListeners();
 
-        // Configurar controles de continentes
+        // 3. Configurar filtros por continentes
         this.setupContinentControls();
 
-        // Configurar controles de la leyenda
+        // 4. Configurar interactividad de la leyenda
         this.setupLegendControls();
-
-        // Configurar controles de zoom y navegación
-        this.setupNavigationControls();
     },
 
     /**
-     * Recorre cada elemento <path> del mapa SVG, asignando sus datos de consumo,
-     * clase CSS, atributos de datos y color de coropleta.
+     * Asocia cada <path> del SVG con su país y color.
+     * Soporta tanto IDs en <path> como en grupos <g id="...">.
      */
     setupCountryPaths: function () {
         const paths = this.svgElement.querySelectorAll('path');
@@ -66,7 +57,6 @@ const MapModule = {
             rawId = rawId || '';
             const countryId = rawId.replace(/^_/, '').toLowerCase();
 
-            // Consultar datos a Martín Concha (CocaColaData)
             const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
 
             if (countryData) {
@@ -74,61 +64,63 @@ const MapModule = {
                 path.setAttribute('data-country-id', countryId);
                 path.setAttribute('data-continent', countryData.continent);
                 path.setAttribute('data-level', countryData.level);
-                path.setAttribute('data-servings', countryData.consumptionServings);
                 path.classList.add('country-path');
-                
-                // Color base según nivel de consumo
                 path.style.fill = color;
             } else {
                 path.setAttribute('data-country-id', countryId);
-                path.setAttribute('data-continent', 'Desconocido');
+                path.setAttribute('data-continent', 'Otro');
                 path.setAttribute('data-level', 'muy_bajo');
-                path.classList.add('country-path', 'country-no-data');
+                path.classList.add('country-path');
                 path.style.fill = '#9CA3AF';
             }
         });
     },
 
     /**
-     * Configura los eventos del mouse (mouseenter, mousemove, mouseleave)
-     * en los países del SVG para disparar el hover visual, tooltip y sonido.
+     * Configura los eventos del mouse.
+     * Garantiza que ningún país anterior quede marcado al cambiar de país.
      */
     setupEventListeners: function () {
         const paths = this.svgElement.querySelectorAll('path.country-path');
 
         paths.forEach(path => {
-            // Al entrar el cursor al país
+            // Hover sobre un país
             path.addEventListener('mouseenter', (e) => {
                 const countryId = path.getAttribute('data-country-id');
                 if (!countryId || countryId === 'desconocido') return;
+
+                // Si ya estamos sobre el mismo país, no repetir
                 if (this.currentHoveredCountryId === countryId) return;
+
+                // Limpiar SIEMPRE cualquier país previo para evitar que quede pegado
+                this.clearAllHighlights();
                 this.currentHoveredCountryId = countryId;
 
                 const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
                 if (!countryData) return;
 
-                // 1. Resaltado visual en el mapa (efecto de dev 1)
+                // 1. Resaltar únicamente este país (y sus islas si tiene)
                 this.highlightCountry(countryId);
 
-                // 2. Mostrar y actualizar contenido del Tooltip
+                // 2. Mostrar Tooltip
                 this.showTooltip(countryData);
                 this.updateTooltipPosition(e);
 
-                // 3. Disparar el sonido de eructo proporcional (módulo de Sebastián Valencia)
-                if (window.SoundEngine) {
+                // 3. Invocar al módulo de audio de Sebastián
+                if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
                     window.SoundEngine.playBurpForCountry(countryData);
                 }
 
-                // 4. Actualizar panel lateral de país activo
+                // 4. Actualizar tarjeta de país en foco en el lateral
                 this.updateSidebarCountryInfo(countryData);
             });
 
-            // Al moverse el cursor dentro del país (posicionamiento suave del tooltip)
+            // Movimiento suave del tooltip
             path.addEventListener('mousemove', (e) => {
                 this.updateTooltipPosition(e);
             });
 
-            // Al salir el cursor del país
+            // Salida del país
             path.addEventListener('mouseleave', () => {
                 const countryId = path.getAttribute('data-country-id');
                 this.unhighlightCountry(countryId);
@@ -136,58 +128,68 @@ const MapModule = {
                 this.currentHoveredCountryId = null;
             });
         });
-    },
 
-    /**
-     * Aplica los estilos y efectos visuales de hover a un país y todos sus territorios.
-     */
-    highlightCountry: function (countryId) {
-        if (!countryId) return;
-        const siblingPaths = this.svgElement.querySelectorAll(`path[data-country-id="${countryId}"]`);
-        siblingPaths.forEach(p => {
-            p.classList.add('is-hovered');
-            if (p.parentNode) {
-                p.parentNode.appendChild(p);
-            }
+        // Limpieza de seguridad al salir completamente del SVG
+        this.svgElement.addEventListener('mouseleave', () => {
+            this.clearAllHighlights();
+            this.hideTooltip();
+            this.currentHoveredCountryId = null;
         });
     },
 
     /**
-     * Restaura los estilos visuales originales de un país.
+     * Ilumina visualmente el país usando clases CSS (sin tocar el orden del DOM).
+     */
+    highlightCountry: function (countryId) {
+        if (!countryId) return;
+        const matchingPaths = this.svgElement.querySelectorAll(`path[data-country-id="${countryId}"]`);
+        matchingPaths.forEach(p => {
+            p.classList.add('is-hovered');
+        });
+    },
+
+    /**
+     * Remueve el resaltado de un país específico.
      */
     unhighlightCountry: function (countryId) {
         if (!countryId) return;
-        const siblingPaths = this.svgElement.querySelectorAll(`path[data-country-id="${countryId}"]`);
-        siblingPaths.forEach(p => {
+        const matchingPaths = this.svgElement.querySelectorAll(`path[data-country-id="${countryId}"]`);
+        matchingPaths.forEach(p => {
             p.classList.remove('is-hovered');
         });
     },
 
     /**
-     * Rellena y muestra el Tooltip flotante con la información de Coca-Cola.
+     * Limpia de inmediato cualquier país resaltado.
+     */
+    clearAllHighlights: function () {
+        const hoveredPaths = this.svgElement.querySelectorAll('path.country-path.is-hovered');
+        hoveredPaths.forEach(p => {
+            p.classList.remove('is-hovered');
+        });
+    },
+
+    /**
+     * Muestra el Tooltip informativo con datos de Coca-Cola.
      */
     showTooltip: function (data) {
         if (!this.tooltipElement) return;
 
         const tier = window.CocaColaData ? window.CocaColaData.getTierConfig(data.level) : {};
-        const servings = data.consumptionServings;
-        const liters = data.consumptionLiters;
-
-        // Construir barra de botellas / nivel visual
-        const maxServings = 750;
-        const percentage = Math.min(100, Math.round((servings / maxServings) * 100));
+        const servings = data.consumptionServings !== undefined ? data.consumptionServings : '--';
+        const liters = data.consumptionLiters !== undefined ? data.consumptionLiters : '--';
 
         this.tooltipElement.innerHTML = `
             <div class="tooltip-header">
                 <span class="tooltip-flag">${data.flag || '🥤'}</span>
                 <div class="tooltip-titles">
                     <h3 class="tooltip-country-name">${data.name}</h3>
-                    <span class="tooltip-continent">${data.continent} &bull; ${data.englishName || ''}</span>
+                    <span class="tooltip-continent">${data.continent}</span>
                 </div>
-                <span class="tooltip-rank">#${data.rank} Mundial</span>
+                ${data.rank && data.rank !== '--' ? `<span class="tooltip-rank">#${data.rank} Mundial</span>` : ''}
             </div>
             
-            <div class="tooltip-tier-badge" style="background-color: ${tier.color};">
+            <div class="tooltip-tier-badge" style="background-color: ${tier.color || '#E50914'};">
                 ${tier.label || 'Nivel de Consumo'}
             </div>
 
@@ -197,42 +199,26 @@ const MapModule = {
                     <span class="metric-label">Porciones (8 oz) / año</span>
                 </div>
                 <div class="metric-item">
-                    <span class="metric-value">${liters} L</span>
+                    <span class="metric-value">${liters} ${typeof liters === 'number' ? 'L' : ''}</span>
                     <span class="metric-label">Litros per cápita</span>
                 </div>
             </div>
 
-            <div class="tooltip-meter-container">
-                <div class="meter-labels">
-                    <span>Intensidad de Consumo</span>
-                    <span>${percentage}%</span>
-                </div>
-                <div class="meter-bar-bg">
-                    <div class="meter-bar-fill" style="width: ${percentage}%; background-color: ${tier.color};"></div>
-                </div>
+            <div class="tooltip-fact">
+                <strong>💡 Información:</strong> ${data.fact || 'Sin información adicional.'}
             </div>
-
-            <div class="tooltip-burp-indicator">
-                <span class="burp-icon">💨</span>
-                <div class="burp-info">
-                    <span class="burp-title">Efecto Acústico (Eructo):</span>
-                    <span class="burp-description">${tier.burpIntensity || 'Proporcional'}</span>
-                </div>
-            </div>
-
-            ${data.fact ? `<div class="tooltip-fact"><strong>💡 Dato curioso:</strong> ${data.fact}</div>` : ''}
         `;
 
         this.tooltipElement.classList.add('visible');
     },
 
     /**
-     * Actualiza las coordenadas del tooltip flotante respecto al cursor con clamping.
+     * Posiciona el tooltip siguiendo el mouse con control de límites en pantalla.
      */
     updateTooltipPosition: function (e) {
         if (!this.tooltipElement) return;
 
-        const offset = 18;
+        const offset = 16;
         let x = e.clientX + offset;
         let y = e.clientY + offset;
 
@@ -240,22 +226,20 @@ const MapModule = {
         const winWidth = window.innerWidth;
         const winHeight = window.innerHeight;
 
-        // Evitar que el tooltip se corte a la derecha
-        if (x + tooltipRect.width > winWidth - 15) {
+        if (x + tooltipRect.width > winWidth - 12) {
             x = e.clientX - tooltipRect.width - offset;
         }
 
-        // Evitar que el tooltip se corte abajo
-        if (y + tooltipRect.height > winHeight - 15) {
+        if (y + tooltipRect.height > winHeight - 12) {
             y = e.clientY - tooltipRect.height - offset;
         }
 
-        this.tooltipElement.style.left = `${Math.max(10, x)}px`;
-        this.tooltipElement.style.top = `${Math.max(10, y)}px`;
+        this.tooltipElement.style.left = `${Math.max(8, x)}px`;
+        this.tooltipElement.style.top = `${Math.max(8, y)}px`;
     },
 
     /**
-     * Oculta el tooltip flotante.
+     * Oculta el tooltip.
      */
     hideTooltip: function () {
         if (this.tooltipElement) {
@@ -264,7 +248,7 @@ const MapModule = {
     },
 
     /**
-     * Configura los botones de selección y filtrado por continentes.
+     * Configura los botones de selección por continentes.
      */
     setupContinentControls: function () {
         const buttons = document.querySelectorAll('.continent-btn');
@@ -281,7 +265,7 @@ const MapModule = {
     },
 
     /**
-     * Resalta visualmente un continente determinado y atenúa los demás.
+     * Filtra y resalta los países del continente seleccionado.
      */
     filterByContinent: function (continent) {
         this.activeContinent = continent;
@@ -291,19 +275,24 @@ const MapModule = {
             const countryContinent = path.getAttribute('data-continent');
             if (continent === 'Todos' || countryContinent === continent) {
                 path.classList.remove('is-dimmed');
-                path.classList.add('is-active-continent');
             } else {
                 path.classList.add('is-dimmed');
-                path.classList.remove('is-active-continent');
             }
         });
 
-        // Actualizar estadísticas del continente en la barra superior
-        this.updateContinentStatsBanner(continent);
+        // Actualizar banner superior de información
+        const banner = document.getElementById('continent-banner-info');
+        if (banner) {
+            if (continent === 'Todos') {
+                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver su información</span>`;
+            } else {
+                banner.innerHTML = `<span>Continente seleccionado: <strong>${continent}</strong></span>`;
+            }
+        }
     },
 
     /**
-     * Configura la interactividad con la leyenda de niveles de consumo.
+     * Configura la interactividad de la leyenda.
      */
     setupLegendControls: function () {
         const legendItems = document.querySelectorAll('.legend-tier');
@@ -311,147 +300,63 @@ const MapModule = {
         legendItems.forEach(item => {
             item.addEventListener('mouseenter', () => {
                 const tierId = item.getAttribute('data-tier');
-                this.highlightTier(tierId);
+                const paths = this.svgElement.querySelectorAll('path.country-path');
+                paths.forEach(path => {
+                    if (path.getAttribute('data-level') === tierId) {
+                        path.classList.add('is-tier-highlighted');
+                    } else {
+                        path.classList.add('is-dimmed');
+                    }
+                });
             });
 
             item.addEventListener('mouseleave', () => {
-                this.clearTierHighlight();
+                const paths = this.svgElement.querySelectorAll('path.country-path');
+                paths.forEach(path => {
+                    path.classList.remove('is-tier-highlighted');
+                    if (this.activeContinent !== 'Todos') {
+                        if (path.getAttribute('data-continent') !== this.activeContinent) {
+                            path.classList.add('is-dimmed');
+                        }
+                    } else {
+                        path.classList.remove('is-dimmed');
+                    }
+                });
             });
         });
     },
 
     /**
-     * Resalta los países que pertenecen a un nivel de consumo específico.
-     */
-    highlightTier: function (tierId) {
-        const paths = this.svgElement.querySelectorAll('path.country-path');
-        paths.forEach(path => {
-            if (path.getAttribute('data-level') === tierId) {
-                path.classList.add('is-tier-highlighted');
-            } else {
-                path.classList.add('is-dimmed');
-            }
-        });
-    },
-
-    /**
-     * Limpia el resaltado de la leyenda.
-     */
-    clearTierHighlight: function () {
-        const paths = this.svgElement.querySelectorAll('path.country-path');
-        paths.forEach(path => {
-            path.classList.remove('is-tier-highlighted');
-            // Respetar el filtro activo de continente
-            if (this.activeContinent !== 'Todos') {
-                if (path.getAttribute('data-continent') !== this.activeContinent) {
-                    path.classList.add('is-dimmed');
-                }
-            } else {
-                path.classList.remove('is-dimmed');
-            }
-        });
-    },
-
-    /**
-     * Configura controles de zoom (+, -, reset).
-     */
-    setupNavigationControls: function () {
-        const zoomInBtn = document.getElementById('btn-zoom-in');
-        const zoomOutBtn = document.getElementById('btn-zoom-out');
-        const resetBtn = document.getElementById('btn-reset-map');
-
-        if (zoomInBtn) {
-            zoomInBtn.addEventListener('click', () => this.applyZoom(1.25));
-        }
-        if (zoomOutBtn) {
-            zoomOutBtn.addEventListener('click', () => this.applyZoom(0.8));
-        }
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => this.resetMap());
-        }
-    },
-
-    applyZoom: function (factor) {
-        this.currentZoom = Math.min(3.5, Math.max(0.7, this.currentZoom * factor));
-        const vb = this.originalViewBox;
-        const newWidth = vb.width / this.currentZoom;
-        const newHeight = vb.height / this.currentZoom;
-        const newX = vb.x + (vb.width - newWidth) / 2;
-        const newY = vb.y + (vb.height - newHeight) / 2;
-
-        this.svgElement.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
-    },
-
-    resetMap: function () {
-        this.currentZoom = 1;
-        const vb = this.originalViewBox;
-        this.svgElement.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
-        this.filterByContinent('Todos');
-        
-        // Reset botones de continente
-        document.querySelectorAll('.continent-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.getAttribute('data-continent') === 'Todos');
-        });
-    },
-
-    /**
-     * Actualiza el panel de información del país seleccionado o en hover.
+     * Actualiza la tarjeta de país seleccionado en el panel lateral.
      */
     updateSidebarCountryInfo: function (data) {
         const infoBox = document.getElementById('featured-country-card');
         if (!infoBox) return;
 
-        const tier = window.CocaColaData ? window.CocaColaData.getTierConfig(data.level) : {};
+        const servings = data.consumptionServings !== undefined ? data.consumptionServings : '--';
+        const liters = data.consumptionLiters !== undefined ? data.consumptionLiters : '--';
+
         infoBox.innerHTML = `
             <div class="featured-header">
                 <span class="featured-flag">${data.flag || '🥤'}</span>
                 <div>
                     <h4>${data.name}</h4>
-                    <span class="featured-sub">${data.continent} &bull; Rank #${data.rank}</span>
+                    <span class="featured-sub">${data.continent} ${data.rank && data.rank !== '--' ? `&bull; Rank #${data.rank}` : ''}</span>
                 </div>
             </div>
             <div class="featured-stat-row">
                 <div class="featured-stat">
-                    <span class="f-num">${data.consumptionServings}</span>
+                    <span class="f-num">${servings}</span>
                     <span class="f-lbl">Porciones 8oz/año</span>
                 </div>
                 <div class="featured-stat">
-                    <span class="f-num">${data.consumptionLiters} L</span>
+                    <span class="f-num">${liters} ${typeof liters === 'number' ? 'L' : ''}</span>
                     <span class="f-lbl">Litros anuales</span>
                 </div>
             </div>
-            <p class="featured-fact">${data.fact}</p>
+            <p class="featured-fact">${data.fact || 'Datos en proceso de recopilación por Martín Concha.'}</p>
         `;
-    },
-
-    /**
-     * Actualiza el banner de resumen al seleccionar un continente.
-     */
-    updateContinentStatsBanner: function (continent) {
-        const banner = document.getElementById('continent-banner-info');
-        if (!banner) return;
-
-        if (continent === 'Todos') {
-            banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas y escuchar su eructo</span>`;
-            return;
-        }
-
-        // Calcular datos del continente
-        const allCountries = Object.values(window.CocaColaData.countries).filter(c => c.continent === continent);
-        if (allCountries.length > 0) {
-            const topInContinent = allCountries.reduce((prev, curr) => (curr.consumptionServings > prev.consumptionServings) ? curr : prev, allCountries[0]);
-            const avgServings = Math.round(allCountries.reduce((sum, c) => sum + c.consumptionServings, 0) / allCountries.length);
-
-            banner.innerHTML = `
-                <span>Continente: <strong>${continent}</strong></span>
-                <span>Promedio: <strong>${avgServings} porciones</strong></span>
-                <span>Líder: <strong>${topInContinent.name} (${topInContinent.consumptionServings} porciones)</strong></span>
-            `;
-        } else {
-            banner.innerHTML = `<span>Filtrando por continente: <strong>${continent}</strong></span>`;
-        }
     }
 };
 
-// Exportar globalmente
 window.MapModule = MapModule;

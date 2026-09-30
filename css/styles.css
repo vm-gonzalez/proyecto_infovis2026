@@ -1,18 +1,18 @@
 /**
  * ====================================================================
  * PROYECTO INFOVIS 2026 - VISUALIZACIÓN DE CONSUMO MUNDIAL DE COCA-COLA
- * Hoja de Estilos Frontend: Dev 1 (Frontend Lead)
+ * Hoja de Estilos Frontend: Vicente Meza (dev 1 - Frontend Lead)
  * ====================================================================
  */
 
 :root {
     --coca-red: #F40009;
     --coca-red-dark: #C8102E;
-    --coca-red-glow: rgba(244, 0, 9, 0.45);
+    --coca-red-glow: rgba(244, 0, 9, 0.4);
     --bg-main: #0c0a0a;
     --bg-surface: #171212;
     --bg-surface-elevated: #211919;
-    --bg-glass: rgba(26, 18, 18, 0.88);
+    --bg-glass: rgba(26, 18, 18, 0.92);
     --border-subtle: rgba(255, 255, 255, 0.1);
     --border-accent: rgba(244, 0, 9, 0.35);
     --text-primary: #FFFFFF;
@@ -152,8 +152,8 @@ body {
 .credit-badge {
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border-subtle);
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 8px 14px;
+    border-radius: 14px;
     font-size: 0.78rem;
     display: flex;
     flex-direction: column;
@@ -171,7 +171,7 @@ body {
 
 .credit-badge.dev1 {
     border-color: rgba(244, 0, 9, 0.5);
-    background: rgba(244, 0, 9, 0.1);
+    background: rgba(244, 0, 9, 0.12);
 }
 
 /* --- Barra de Filtros y Navegación por Continentes --- */
@@ -230,91 +230,31 @@ body {
     font-weight: 700;
 }
 
-/* --- Controles de Audio --- */
-.audio-controls {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.audio-btn {
-    background: var(--bg-surface-elevated);
-    border: 1px solid rgba(244, 0, 9, 0.4);
-    color: var(--text-primary);
-    padding: 7px 14px;
-    border-radius: 20px;
+.status-badge-visual {
     font-size: 0.82rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-}
-
-.audio-btn:hover {
-    background: rgba(244, 0, 9, 0.18);
-    box-shadow: 0 0 10px rgba(244, 0, 9, 0.3);
-}
-
-.audio-btn.is-muted {
-    border-color: #666;
-    color: #888;
-    background: #1a1a1a;
-}
-
-.volume-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
     color: var(--text-muted);
-}
-
-.volume-wrapper input[type="range"] {
-    accent-color: var(--coca-red);
-    cursor: pointer;
-    width: 75px;
-}
-
-.audio-wave {
     display: flex;
-    align-items: flex-end;
-    gap: 2px;
-    height: 18px;
+    align-items: center;
+    gap: 8px;
 }
 
-.wave-bar {
-    width: 3px;
-    background-color: var(--coca-red);
-    border-radius: 2px;
-    animation: soundWave 0.8s ease-in-out infinite alternate;
+.status-indicator-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #22C55E;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22C55E;
 }
 
-.wave-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
-.wave-bar:nth-child(2) { height: 14px; animation-delay: 0.2s; }
-.wave-bar:nth-child(3) { height: 18px; animation-delay: 0.3s; }
-.wave-bar:nth-child(4) { height: 10px; animation-delay: 0.15s; }
-
-.audio-wave.muted .wave-bar {
-    animation: none;
-    height: 3px;
-    background-color: #555;
-}
-
-@keyframes soundWave {
-    0% { height: 4px; }
-    100% { height: 18px; }
-}
-
-/* --- Contenedor Principal: Mapa + Sidebar --- */
+/* --- Contenedor Principal: Mapa + Sidebar (FIJO sin saltos) --- */
 .content-grid {
     display: grid;
     grid-template-columns: 1fr 340px;
     gap: 16px;
-    flex: 1;
+    align-items: start; /* CRUCIAL: Evita que el cambio de altura del sidebar mueva el mapa */
 }
 
-/* --- Área del Mapa SVG --- */
+/* --- Área del Mapa SVG Fija --- */
 .map-panel {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
@@ -335,85 +275,58 @@ body {
     border-bottom: 1px solid var(--border-subtle);
     font-size: 0.85rem;
     color: var(--text-secondary);
+    min-height: 42px;
+    box-sizing: border-box;
 }
 
+/* Altura fija para que el mapa quede 100% inmóvil */
 .map-view-wrapper {
     position: relative;
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 15px;
-    min-height: 480px;
+    padding: 14px;
+    height: 500px;
+    min-height: 500px;
+    max-height: 500px;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 #world-map {
     width: 100%;
-    height: auto;
-    max-height: 580px;
+    height: 100%;
+    max-height: 470px;
     display: block;
-    transition: transform 0.3s ease;
 }
 
-/* --- Estilos SVG para cada país (Choropleth y Hover) --- */
+/* --- Estilos SVG para cada país --- */
 #world-map path.country-path {
-    stroke: #261c1c;
+    stroke: #221a1a;
     stroke-width: 0.65px;
     cursor: pointer;
-    transition: fill 0.25s ease, stroke 0.25s ease, stroke-width 0.25s ease, filter 0.25s ease, opacity 0.25s ease;
+    paint-order: stroke fill;
+    transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
 }
 
-/* Hover espectacular diseñado por Dev 1 */
-#world-map path.country-path:hover,
+/* Hover sin alteración del DOM */
 #world-map path.country-path.is-hovered {
     stroke: #FFFFFF !important;
-    stroke-width: 2.4px !important;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85)) drop-shadow(0 0 20px var(--coca-red-glow)) brightness(1.22);
+    stroke-width: 2.2px !important;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.85)) drop-shadow(0 0 16px rgba(244, 0, 9, 0.5));
 }
 
-/* Atenuación de países al filtrar continente o categoría */
+/* Atenuación al filtrar continente */
 #world-map path.country-path.is-dimmed {
-    opacity: 0.18 !important;
+    opacity: 0.16 !important;
     filter: grayscale(85%) !important;
 }
 
-/* Resaltado de países por nivel de consumo */
+/* Resaltado de categoría en la leyenda */
 #world-map path.country-path.is-tier-highlighted {
-    stroke: #FFF;
-    stroke-width: 2.2px;
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
-}
-
-/* Botones de navegación sobre el mapa (+, -, reset) */
-.map-nav-overlay {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    z-index: 10;
-}
-
-.nav-btn {
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-primary);
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.2s ease;
-}
-
-.nav-btn:hover {
-    background: var(--coca-red);
-    border-color: var(--coca-red);
+    stroke: #FFFFFF;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.7));
 }
 
 /* --- Barra de Leyenda de Consumo --- */
@@ -426,6 +339,8 @@ body {
     background: rgba(0, 0, 0, 0.45);
     border-top: 1px solid var(--border-subtle);
     flex-wrap: wrap;
+    min-height: 48px;
+    box-sizing: border-box;
 }
 
 .legend-title {
@@ -517,15 +432,6 @@ body {
     transform: translateX(4px);
 }
 
-.ranking-item.ranking-clicked {
-    animation: clickFlash 0.5s ease;
-}
-
-@keyframes clickFlash {
-    0%, 100% { background: #281919; }
-    50% { background: rgba(244, 0, 9, 0.4); transform: scale(1.03); }
-}
-
 .ranking-pos {
     font-weight: 800;
     color: var(--coca-red);
@@ -561,7 +467,14 @@ body {
     color: #FFF;
 }
 
-/* Tarjeta de país destacado / activo */
+/* Tarjeta de país en foco con altura mínima controlada */
+#featured-country-card {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
 .featured-header {
     display: flex;
     align-items: center;
@@ -620,20 +533,7 @@ body {
     border-radius: 0 6px 6px 0;
 }
 
-/* Efecto de temblor en la tarjeta ante un eructo fuerte */
-.shake-card {
-    animation: cardRumble 0.35s ease-in-out;
-}
-
-@keyframes cardRumble {
-    0%, 100% { transform: translate(0, 0); }
-    20% { transform: translate(-3px, 2px); }
-    40% { transform: translate(3px, -2px); }
-    60% { transform: translate(-2px, -1px); }
-    80% { transform: translate(2px, 1px); }
-}
-
-/* --- Tooltip Flotante de Hover (Mundo & Países) --- */
+/* --- Tooltip Flotante de Hover --- */
 #country-tooltip {
     position: fixed;
     z-index: 9999;
@@ -648,7 +548,7 @@ body {
     border: 1px solid rgba(244, 0, 9, 0.4);
     border-radius: 14px;
     padding: 16px 18px;
-    width: 310px;
+    width: 300px;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(244, 0, 9, 0.25);
 }
 
@@ -701,14 +601,13 @@ body {
     padding: 4px 10px;
     border-radius: 12px;
     margin-bottom: 12px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .tooltip-metrics {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .metric-item {
@@ -729,64 +628,6 @@ body {
 .metric-label {
     font-size: 0.68rem;
     color: var(--text-muted);
-}
-
-.tooltip-meter-container {
-    margin-bottom: 12px;
-}
-
-.meter-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
-}
-
-.meter-bar-bg {
-    width: 100%;
-    height: 7px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.meter-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.3s ease;
-}
-
-.tooltip-burp-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(244, 0, 9, 0.15);
-    border: 1px solid rgba(244, 0, 9, 0.35);
-    padding: 8px 10px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-
-.burp-icon {
-    font-size: 1.4rem;
-}
-
-.burp-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.burp-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--coca-red);
-    text-transform: uppercase;
-}
-
-.burp-description {
-    font-size: 0.76rem;
-    color: var(--text-secondary);
 }
 
 .tooltip-fact {
@@ -813,25 +654,6 @@ body {
 /* Responsividad */
 @media (max-width: 1100px) {
     .content-grid {
-        grid-template-columns: 1fr;
-    }
-    .sidebar-panel {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .main-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    .toolbar-section {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .sidebar-panel {
         grid-template-columns: 1fr;
     }
 }
