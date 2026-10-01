@@ -13,6 +13,7 @@
  */
 
 const SoundEngine = {
+    currentBurp: null,
     /**
      * Esta función es invocada por el frontend (Vicente Meza) cada vez
      * que el usuario pasa el mouse sobre un país en el mapa.
@@ -24,9 +25,85 @@ const SoundEngine = {
      */
     playBurpForCountry: function (countryData) {
         if (!countryData) return;
-        
-        // TODO (Martín Concha): Integrar aquí la reproducción de los audios de eructos.
-        console.log(`[Audio Martín] Hover sobre ${countryData.name} (Nivel: ${countryData.level}). Eructo pendiente de implementar por Martín.`);
+        if (!countryData.hasData) return;
+
+        if (this.currentBurp) {
+            this.currentBurp.pause();
+            this.currentBurp.currentTime = 0;
+        }
+
+        // console.log(`[Audio Martín] Hover sobre ${countryData.name} (Nivel: ${countryData.level}). Eructo pendiente de implementar por Martín.`); */
+
+        const burp = new Audio('sounds/burp.mp3');
+        this.currentBurp = burp;
+
+        // control volumen
+        if (countryData.level === 'muy_alto') {
+            burp.volume = 1.0;
+        } else if (countryData.level === 'alto') {
+            burp.volume = 0.55;
+        } else if (countryData.level === 'medio') {
+            burp.volume = 0.35;
+        } else if (countryData.level === 'bajo') {
+            burp.volume = 0.15;
+        } else if (countryData.level === 'muy_bajo') {
+            burp.volume = 0.07;
+        }
+
+        // control rápidez y tono
+        let playbackRate;
+
+        if (countryData.level === 'muy_alto') {
+            playbackRate = 0.55;
+        } else if (countryData.level === 'alto') {
+            playbackRate = 0.76;
+        } else if (countryData.level === 'medio') {
+            playbackRate = 0.9;
+        } else if (countryData.level === 'bajo') {
+            playbackRate = 1.1;
+        } else if (countryData.level === 'muy_bajo') {
+            playbackRate = 1.5;
+        }
+
+        burp.playbackRate = playbackRate;
+
+        // control duración
+        let duration;
+
+        if (countryData.level === 'muy_alto') {
+            duration = 2000;
+        } else if (countryData.level === 'alto') {
+            duration = 1050;
+        } else if (countryData.level === 'medio') {
+            duration = 750;
+        } else if (countryData.level === 'bajo') {
+            duration = 550;
+        } else if (countryData.level === 'muy_bajo') {
+            duration = 410;
+        }
+
+        burp.play();
+
+
+        const fadeDuration = 200;
+
+        setTimeout(() => {
+            const initialVolume = burp.volume;
+            const fadeStart = Date.now();
+
+            const fade = setInterval(() => {
+                const elapsed = Date.now() - fadeStart;
+                const progress = Math.min(elapsed / fadeDuration, 1);
+
+                burp.volume = initialVolume * (1 - progress);
+
+                if (progress >= 1) {
+                    clearInterval(fade);
+                    burp.pause();
+                    burp.currentTime = 0;
+                }
+            }, 20);
+        }, Math.max(0, duration - fadeDuration));
     }
 };
 

@@ -481,7 +481,7 @@
                     <div class="legend-tiers">
                         <div class="legend-tier" data-tier="muy_alto">
                             <span class="color-swatch" style="background-color: var(--tier-muy-alto);"></span>
-                            <span>Muy Alto (&gt;400)</span>
+                            <span>Muy Alto (≥400)</span>
                         </div>
                         <div class="legend-tier" data-tier="alto">
                             <span class="color-swatch" style="background-color: var(--tier-alto);"></span>
@@ -499,8 +499,20 @@
                             <span class="color-swatch" style="background-color: var(--tier-muy-bajo);"></span>
                             <span>Muy Bajo (&lt;40)</span>
                         </div>
+                        <div class="legend-tier" data-tier="sin_datos">
+                            <span class="color-swatch" style="background-color: #2A2020; border: 1px solid rgba(255,255,255,0.25);"></span>
+                            <span>Sin datos</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Nota de la fuente de datos -->
+                <p class="data-source-note">
+                    Fuente: The Coca-Cola Company (2012), <em>Per Capita Consumption of Company Beverage Products</em>.
+                    Porciones de 8 oz (236,6 ml) por persona en 2011, considerando todas las marcas de la compañía.
+                    Países en gris oscuro: sin datos en la fuente.
+                    <a href="https://wonderprofessor.com/121/Chap09/Chap09_CocaCola_2011_PerCapitaConsumption_Growth.pdf" target="_blank" rel="noopener">Ver documento</a>
+                </p>
             </div>
 
             <!-- Panel Lateral (Sidebar) -->
@@ -549,6 +561,7 @@
     <div id="country-tooltip"></div>
 
     <!-- Scripts Modulares -->
+    <script src="data/coca-cola-per-capita.js"></script>
     <script src="js/data.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/map.js"></script>
