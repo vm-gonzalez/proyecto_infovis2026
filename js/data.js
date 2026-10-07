@@ -13,11 +13,11 @@
 const CocaColaData = {
     // Categorías de consumo para la visualización (Escala Secuencial Monocromática Rojo Coca-Cola)
     TIERS: {
-        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 400 porciones/año', color: '#FF4D55' },
-        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '250 - 399 porciones/año', color: '#E71D28' },
-        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '120 - 249 porciones/año', color: '#B81923' },
-        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '40 - 119 porciones/año', color: '#7E1A22' },
-        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '0 - 39 porciones/año',   color: '#4A181C' }
+        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 400 porciones/año', color: '#F40009' },
+        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '250 - 399 porciones/año', color: '#CF131C' },
+        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '120 - 249 porciones/año', color: '#9E181F' },
+        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '40 - 119 porciones/año', color: '#66191E' },
+        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '0 - 39 porciones/año',   color: '#3A1417' }
     },
 
     // Diccionario completo de nombres de países en español (180 países del SVG)

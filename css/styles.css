@@ -21,12 +21,12 @@
     --text-muted: #8E8282;
     --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
     
-    /* Colores del Choropleth (Escala Secuencial Monocromática Rojo Coca-Cola) */
-    --tier-muy-alto: #FF4D55;
-    --tier-alto:     #E71D28;
-    --tier-medio:    #B81923;
-    --tier-bajo:     #7E1A22;
-    --tier-muy-bajo: #4A181C;
+    /* Colores del Choropleth (Escala Secuencial Monocromática Rojo Coca-Cola - Calibrada por Saturación) */
+    --tier-muy-alto: #F40009;
+    --tier-alto:     #CF131C;
+    --tier-medio:    #9E181F;
+    --tier-bajo:     #66191E;
+    --tier-muy-bajo: #3A1417;
     --tier-sin-datos: #241E1E;
 }
 
