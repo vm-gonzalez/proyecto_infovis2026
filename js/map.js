@@ -83,7 +83,7 @@ const MapModule = {
                 // 1. Iluminar país en hover
                 this.highlightCountry(countryId);
 
-                // 2. Mostrar recuadros en el Tooltip
+                // 2. Mostrar Tooltip optimizado
                 this.showTooltip(countryData);
                 this.updateTooltipPosition(e);
 
@@ -91,9 +91,6 @@ const MapModule = {
                 if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
                     window.SoundEngine.playBurpForCountry(countryData);
                 }
-
-                // 4. Actualizar recuadro lateral
-                this.updateSidebarCountryInfo(countryData);
             });
 
             path.addEventListener('mousemove', (e) => {
@@ -134,7 +131,7 @@ const MapModule = {
     },
 
     /**
-     * Muestra el Tooltip con los recuadros/espacios preparados.
+     * Muestra el Tooltip informativo de forma minimalista y concisa.
      */
     showTooltip: function (data) {
         if (!this.tooltipElement) return;
@@ -142,6 +139,16 @@ const MapModule = {
         const tier = window.CocaColaData ? window.CocaColaData.getTierConfig(data.level) : {};
         const servings = data.consumptionServings !== undefined ? data.consumptionServings : '---';
         const liters = data.consumptionLiters !== undefined ? data.consumptionLiters : '---';
+
+        const tierBadge = data.hasData ? `
+            <div class="tooltip-tier-badge" style="background: ${tier.color}24; border: 1px solid ${tier.color}; color: #FFFFFF;">
+                ${tier.label}
+            </div>
+        ` : `
+            <div class="tooltip-tier-badge" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted);">
+                Sin datos en la fuente
+            </div>
+        `;
 
         this.tooltipElement.innerHTML = `
             <div class="tooltip-header">
@@ -152,25 +159,24 @@ const MapModule = {
                 </div>
             </div>
             
-            <div class="tooltip-tier-badge placeholder-badge">
-                ${tier.label || '[Espacio: Nivel de Consumo]'}
-            </div>
+            ${tierBadge}
 
             <div class="tooltip-metrics">
-                <div class="metric-item placeholder-box">
+                <div class="metric-item">
                     <span class="metric-value">${servings}</span>
-                    <span class="metric-label">Porciones de 8 oz por persona / año</span>
+                    <span class="metric-label">Porciones / año</span>
                 </div>
-                <div class="metric-item placeholder-box">
+                <div class="metric-item">
                     <span class="metric-value">${liters}</span>
-                    <span class="metric-label">Litros por persona / año</span>
+                    <span class="metric-label">Litros / año</span>
                 </div>
             </div>
 
-            <div class="tooltip-fact placeholder-box">
-                <span class="placeholder-tag">[Recuadro de Información]</span>
-                <p>${data.fact || 'Espacio reservado para la información de Sebastián Valencia.'}</p>
-            </div>
+            ${data.hasData && data.fact ? `
+                <div class="tooltip-fact">
+                    <p>${data.fact}</p>
+                </div>
+            ` : ''}
         `;
 
         this.tooltipElement.classList.add('visible');
@@ -179,24 +185,27 @@ const MapModule = {
     updateTooltipPosition: function (e) {
         if (!this.tooltipElement) return;
 
-        const offset = 16;
-        let x = e.clientX + offset;
-        let y = e.clientY + offset;
+        if (this._rafTooltip) cancelAnimationFrame(this._rafTooltip);
+        this._rafTooltip = requestAnimationFrame(() => {
+            const offset = 14;
+            let x = e.clientX + offset;
+            let y = e.clientY + offset;
 
-        const tooltipRect = this.tooltipElement.getBoundingClientRect();
-        const winWidth = window.innerWidth;
-        const winHeight = window.innerHeight;
+            const tooltipWidth = 280;
+            const tooltipHeight = 160;
+            const winWidth = window.innerWidth;
+            const winHeight = window.innerHeight;
 
-        if (x + tooltipRect.width > winWidth - 12) {
-            x = e.clientX - tooltipRect.width - offset;
-        }
+            if (x + tooltipWidth > winWidth - 12) {
+                x = e.clientX - tooltipWidth - offset;
+            }
 
-        if (y + tooltipRect.height > winHeight - 12) {
-            y = e.clientY - tooltipRect.height - offset;
-        }
+            if (y + tooltipHeight > winHeight - 12) {
+                y = e.clientY - tooltipHeight - offset;
+            }
 
-        this.tooltipElement.style.left = `${Math.max(8, x)}px`;
-        this.tooltipElement.style.top = `${Math.max(8, y)}px`;
+            this.tooltipElement.style.transform = `translate3d(${Math.max(8, x)}px, ${Math.max(8, y)}px, 0)`;
+        });
     },
 
     hideTooltip: function () {
@@ -307,41 +316,6 @@ const MapModule = {
                 this.applyFilters();
             });
         });
-    },
-
-    /**
-     * Actualiza el recuadro lateral para el país seleccionado.
-     */
-    updateSidebarCountryInfo: function (data) {
-        const infoBox = document.getElementById('featured-country-card');
-        if (!infoBox) return;
-
-        const servings = data.consumptionServings !== undefined ? data.consumptionServings : '---';
-        const liters = data.consumptionLiters !== undefined ? data.consumptionLiters : '---';
-
-        infoBox.innerHTML = `
-            <div class="featured-header">
-                <span class="featured-flag">${data.flag || '🏳️'}</span>
-                <div>
-                    <h4>${data.name}</h4>
-                    <span class="featured-sub">${data.continent}</span>
-                </div>
-            </div>
-            <div class="featured-stat-row">
-                <div class="featured-stat placeholder-box">
-                    <span class="f-num">${servings}</span>
-                    <span class="f-lbl">Porciones de 8 oz por persona / año</span>
-                </div>
-                <div class="featured-stat placeholder-box">
-                    <span class="f-num">${liters}</span>
-                    <span class="f-lbl">Litros por persona / año</span>
-                </div>
-            </div>
-            <div class="featured-fact placeholder-box">
-                <span class="placeholder-tag">[Recuadro de Información]</span>
-                <p>${data.fact || 'Espacio reservado para la información de Sebastián Valencia.'}</p>
-            </div>
-        `;
     }
 };
 

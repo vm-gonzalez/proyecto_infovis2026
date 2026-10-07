@@ -79,14 +79,10 @@ function renderTopRanking(continent = 'Todos') {
     const items = listContainer.querySelectorAll('.ranking-item[data-country-id]');
     items.forEach(item => {
         const countryId = item.getAttribute('data-country-id');
-        const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
 
         item.addEventListener('mouseenter', () => {
             if (window.MapModule && countryId) {
                 window.MapModule.highlightCountry(countryId);
-                if (countryData) {
-                    window.MapModule.updateSidebarCountryInfo(countryData);
-                }
             }
         });
 
@@ -101,18 +97,18 @@ function renderTopRanking(continent = 'Todos') {
 window.renderTopRanking = renderTopRanking;
 
 /**
- * Genera pequeñas burbujas decorativas que ascienden por el fondo.
+ * Genera pequeñas burbujas decorativas ligeras y fluidas.
  */
 function createCarbonationBubbles() {
     const container = document.getElementById('bubbles-bg');
     if (!container) return;
 
-    const bubbleCount = 20;
+    const bubbleCount = 12;
     for (let i = 0; i < bubbleCount; i++) {
         const bubble = document.createElement('div');
         bubble.className = 'coca-bubble';
         
-        const size = Math.random() * 6 + 3;
+        const size = Math.random() * 5 + 3;
         const left = Math.random() * 100;
         const duration = Math.random() * 8 + 6;
         const delay = Math.random() * 8;

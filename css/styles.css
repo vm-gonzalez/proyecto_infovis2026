@@ -67,6 +67,7 @@ body {
     border-radius: 50%;
     animation: riseBubble linear infinite;
     pointer-events: none;
+    will-change: transform, opacity;
 }
 
 @keyframes riseBubble {
@@ -146,46 +147,16 @@ body {
     margin-top: 4px;
 }
 
-.team-credits {
-    display: flex;
-    gap: 10px;
-}
-
-.credit-badge {
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border-subtle);
-    padding: 8px 14px;
-    border-radius: 14px;
-    font-size: 0.78rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.credit-badge strong {
-    color: var(--text-primary);
-}
-
-.credit-badge span {
-    color: var(--text-muted);
-    font-size: 0.72rem;
-}
-
-.credit-badge.dev1 {
-    border-color: rgba(244, 0, 9, 0.5);
-    background: rgba(244, 0, 9, 0.12);
-}
-
 /* --- Barra de Filtros por Continentes --- */
 .toolbar-section {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: 12px;
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    padding: 12px 20px;
+    padding: 10px 18px;
     border-radius: 14px;
 }
 
@@ -197,9 +168,11 @@ body {
 }
 
 .filter-label {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
     margin-right: 4px;
 }
 
@@ -207,12 +180,12 @@ body {
     background: var(--bg-surface-elevated);
     color: var(--text-secondary);
     border: 1px solid var(--border-subtle);
-    padding: 7px 15px;
-    border-radius: 20px;
-    font-size: 0.84rem;
+    padding: 6px 14px;
+    border-radius: 18px;
+    font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -228,24 +201,8 @@ body {
     background: linear-gradient(135deg, var(--coca-red), var(--coca-red-dark));
     color: #FFFFFF;
     border-color: transparent;
-    box-shadow: 0 4px 15px rgba(244, 0, 9, 0.45);
+    box-shadow: 0 3px 12px rgba(244, 0, 9, 0.4);
     font-weight: 700;
-}
-
-.status-badge-visual {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.status-indicator-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #22C55E;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #22C55E;
 }
 
 /* --- Contenedor Principal: Mapa + Sidebar (FIJO sin saltos) --- */
@@ -302,34 +259,34 @@ body {
     display: block;
 }
 
-/* --- Estilos SVG para cada país --- */
+/* --- Estilos SVG para cada país (Optimizado para 60fps) --- */
 #world-map path.country-path {
     stroke: #181212;
     stroke-width: 0.65px;
     cursor: pointer;
     paint-order: stroke fill;
-    transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+    transition: fill 0.15s ease, stroke 0.15s ease, opacity 0.2s ease;
+    will-change: fill, opacity;
 }
 
-/* Hover sin acumulación de marcas */
+/* Hover fluido sin sobrecarga de filtros */
 #world-map path.country-path.is-hovered {
     fill: #3D2B2B !important;
     stroke: #FFFFFF !important;
-    stroke-width: 2.2px !important;
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.85)) drop-shadow(0 0 16px rgba(244, 0, 9, 0.5));
+    stroke-width: 2px !important;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.75));
 }
 
-/* Atenuación por continente */
+/* Atenuación eficiente por aceleración de composición GPU */
 #world-map path.country-path.is-dimmed {
-    opacity: 0.16 !important;
-    filter: grayscale(85%) !important;
+    opacity: 0.14 !important;
 }
 
 /* Resaltado de categoría en la leyenda */
 #world-map path.country-path.is-tier-highlighted {
     stroke: #FFFFFF;
-    stroke-width: 2px;
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.7));
+    stroke-width: 1.8px;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
 }
 
 /* --- Barra de Leyenda de Consumo (Escala Secuencial Monocromática) --- */
@@ -555,153 +512,39 @@ body {
     border: 1px dashed var(--border-dashed);
 }
 
-/* Tarjeta de país en foco con altura mínima controlada */
-#featured-country-card {
-    min-height: 190px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
-
-/* Estado vacío inicial para el país en foco */
-.empty-state-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px 12px;
-    border: 1px dashed var(--border-dashed);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.02);
-    min-height: 170px;
-}
-
-.empty-state-icon {
-    font-size: 2.2rem;
-    margin-bottom: 8px;
-    opacity: 0.8;
-}
-
-.empty-state-card h4 {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-}
-
-.empty-state-card p {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-    max-width: 240px;
-}
-
-/* Recuadros internos para el hover activo */
-.placeholder-box {
-    border: 1px dashed var(--border-dashed);
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
-    padding: 8px 10px;
-}
-
-.placeholder-badge {
-    border: 1px dashed rgba(244, 0, 9, 0.5);
-    background: rgba(244, 0, 9, 0.1);
-    color: var(--text-secondary);
-    font-size: 0.74rem;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 12px;
-    display: inline-block;
-    margin-bottom: 10px;
-}
-
-.placeholder-tag {
-    font-size: 0.68rem;
-    color: var(--coca-red);
-    font-weight: 700;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.featured-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.featured-flag {
-    font-size: 2rem;
-}
-
-.featured-header h4 {
-    font-size: 1.15rem;
-    font-weight: 700;
-}
-
-.featured-sub {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-}
-
-.featured-stat-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.featured-stat {
-    text-align: center;
-}
-
-.featured-stat .f-num {
-    display: block;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--text-primary);
-}
-
-.featured-stat .f-lbl {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-}
-
-.featured-fact {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    line-height: 1.45;
-}
-
-.featured-fact p {
-    margin: 0;
-}
-
-/* --- Tooltip Flotante de Hover (Recuadros) --- */
+/* --- Tooltip Flotante de Hover (Optimizado para GPU) --- */
 #country-tooltip {
     position: fixed;
+    top: 0;
+    left: 0;
     z-index: 9999;
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
-    transform: scale(0.95);
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    transition: opacity 0.12s ease;
     background: var(--bg-glass);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(244, 0, 9, 0.4);
-    border-radius: 14px;
-    padding: 16px 18px;
-    width: 290px;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(244, 0, 9, 0.25);
+    border-radius: 12px;
+    padding: 14px 16px;
+    width: 280px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 16px rgba(244, 0, 9, 0.2);
+    will-change: transform, opacity;
 }
 
 #country-tooltip.visible {
     opacity: 1;
     visibility: visible;
-    transform: scale(1);
+}
+
+.tooltip-tier-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 8px;
 }
 
 .tooltip-header {
