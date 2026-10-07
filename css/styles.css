@@ -21,12 +21,13 @@
     --text-muted: #8E8282;
     --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
     
-    /* Colores del Choropleth */
-    --tier-muy-alto: #E50914;
-    --tier-alto: #FF4D4D;
-    --tier-medio: #FFA94D;
-    --tier-bajo: #FFE066;
-    --tier-muy-bajo: #6B7280;
+    /* Colores del Choropleth (Escala Secuencial Monocromática Rojo Coca-Cola) */
+    --tier-muy-alto: #FF4D55;
+    --tier-alto:     #E71D28;
+    --tier-medio:    #B81923;
+    --tier-bajo:     #7E1A22;
+    --tier-muy-bajo: #4A181C;
+    --tier-sin-datos: #241E1E;
 }
 
 * {
@@ -331,18 +332,107 @@ body {
     filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.7));
 }
 
-/* --- Barra de Leyenda de Consumo --- */
+/* --- Barra de Leyenda de Consumo (Escala Secuencial Monocromática) --- */
 .legend-bar {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 16px;
-    padding: 12px 20px;
-    background: rgba(0, 0, 0, 0.45);
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.55);
     border-top: 1px solid var(--border-subtle);
     flex-wrap: wrap;
-    min-height: 48px;
+    min-height: 52px;
     box-sizing: border-box;
+}
+
+.legend-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.legend-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-hint {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.legend-ramp-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.legend-tiers {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.legend-tier {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.legend-tier:hover {
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    border-color: rgba(255, 77, 85, 0.4);
+    transform: translateY(-1px);
+}
+
+.legend-tier.is-active {
+    background: rgba(244, 0, 9, 0.18);
+    border-color: var(--tier-muy-alto);
+    color: #FFFFFF;
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(255, 77, 85, 0.35);
+}
+
+.legend-tier .tier-label {
+    font-weight: 600;
+}
+
+.legend-tier .tier-range {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.legend-tier.is-active .tier-range {
+    color: var(--text-secondary);
+}
+
+.legend-divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 4px;
+}
+
+.color-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
 }
 
 .data-source-note {
@@ -358,44 +448,6 @@ body {
 .data-source-note a {
     color: var(--text-secondary);
     text-decoration: underline;
-}
-
-.legend-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.legend-tiers {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.legend-tier {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.76rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: background 0.2s ease;
-}
-
-.legend-tier:hover {
-    background: var(--bg-surface-elevated);
-    color: var(--text-primary);
-}
-
-.color-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* --- Panel Lateral (Sidebar) --- */
@@ -423,7 +475,17 @@ body {
     gap: 8px;
 }
 
-/* Lista Top 5 (Placeholders / Recuadros) */
+.ranking-subtitle-note {
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    margin-top: -6px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Lista Top 5 (Placeholders / Recuadros interactivos) */
 .ranking-list {
     list-style: none;
     display: flex;
@@ -440,10 +502,19 @@ body {
     padding: 9px 12px;
     border-radius: 10px;
     transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.ranking-item:hover {
+    background: #251819;
+    border-color: rgba(244, 0, 9, 0.5);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .ranking-item.placeholder-ranking {
     opacity: 0.85;
+    cursor: default;
 }
 
 .ranking-pos {

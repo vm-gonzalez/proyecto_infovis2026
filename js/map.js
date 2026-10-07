@@ -14,6 +14,7 @@ const MapModule = {
     svgElement: null,
     tooltipElement: null,
     activeContinent: 'Todos',
+    activeTier: null,
     currentHoveredCountryId: null,
 
     init: function () {
@@ -59,7 +60,7 @@ const MapModule = {
             // Color según el nivel de consumo del dataset; países sin dato quedan con color base
             const level = countryData && countryData.level ? countryData.level : 'sin_datos';
             path.setAttribute('data-level', level);
-            path.style.fill = window.CocaColaData ? window.CocaColaData.getColorByLevel(countryData?.level) : '#2A2020';
+            path.style.fill = window.CocaColaData ? window.CocaColaData.getColorByLevel(countryData?.level) : '#241E1E';
         });
     },
 
@@ -218,26 +219,49 @@ const MapModule = {
         });
     },
 
-    filterByContinent: function (continent) {
-        this.activeContinent = continent;
+    applyFilters: function () {
         const paths = this.svgElement.querySelectorAll('path.country-path');
-
         paths.forEach(path => {
             const countryContinent = path.getAttribute('data-continent');
-            if (continent === 'Todos' || countryContinent === continent) {
+            const countryTier = path.getAttribute('data-level');
+
+            const matchesContinent = (this.activeContinent === 'Todos' || countryContinent === this.activeContinent);
+            const matchesTier = (!this.activeTier || countryTier === this.activeTier);
+
+            if (matchesContinent && matchesTier) {
                 path.classList.remove('is-dimmed');
+                if (this.activeTier) {
+                    path.classList.add('is-tier-highlighted');
+                } else {
+                    path.classList.remove('is-tier-highlighted');
+                }
             } else {
                 path.classList.add('is-dimmed');
+                path.classList.remove('is-tier-highlighted');
             }
         });
+    },
+
+    filterByContinent: function (continent) {
+        this.activeContinent = continent;
+        this.applyFilters();
 
         const banner = document.getElementById('continent-banner-info');
         if (banner) {
             if (continent === 'Todos') {
-                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver su recuadro</span>`;
+                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas</span>`;
             } else {
-                banner.innerHTML = `<span>Continente seleccionado: <strong>${continent}</strong></span>`;
+                const stats = window.CocaColaData ? window.CocaColaData.getContinentStats(continent) : null;
+                const statsText = stats && stats.count > 0
+                    ? ` &bull; <strong>${stats.count}</strong> países reportados &bull; Promedio: <strong>${stats.avgServings}</strong> porciones/año`
+                    : ' &bull; Sin países reportados en la fuente';
+                banner.innerHTML = `<span>Continente: <strong>${continent}</strong>${statsText}</span>`;
             }
+        }
+
+        // Coordinación analítica: Actualizar Top 5 del continente
+        if (typeof window.renderTopRanking === 'function') {
+            window.renderTopRanking(continent);
         }
     },
 
@@ -245,30 +269,42 @@ const MapModule = {
         const legendItems = document.querySelectorAll('.legend-tier');
 
         legendItems.forEach(item => {
+            const tierId = item.getAttribute('data-tier');
+
+            // 1. Hover temporal (Brushing sobre el mapa)
             item.addEventListener('mouseenter', () => {
-                const tierId = item.getAttribute('data-tier');
+                if (this.activeTier) return; // Si hay filtro fijo por click, respetar el estado
                 const paths = this.svgElement.querySelectorAll('path.country-path');
                 paths.forEach(path => {
-                    if (path.getAttribute('data-level') === tierId) {
+                    const matchesContinent = (this.activeContinent === 'Todos' || path.getAttribute('data-continent') === this.activeContinent);
+                    if (path.getAttribute('data-level') === tierId && matchesContinent) {
                         path.classList.add('is-tier-highlighted');
+                        path.classList.remove('is-dimmed');
                     } else {
                         path.classList.add('is-dimmed');
+                        path.classList.remove('is-tier-highlighted');
                     }
                 });
             });
 
             item.addEventListener('mouseleave', () => {
-                const paths = this.svgElement.querySelectorAll('path.country-path');
-                paths.forEach(path => {
-                    path.classList.remove('is-tier-highlighted');
-                    if (this.activeContinent !== 'Todos') {
-                        if (path.getAttribute('data-continent') !== this.activeContinent) {
-                            path.classList.add('is-dimmed');
-                        }
-                    } else {
-                        path.classList.remove('is-dimmed');
-                    }
-                });
+                if (this.activeTier) return; // Si hay filtro fijo por click, no resetear
+                this.applyFilters();
+            });
+
+            // 2. Click para alternar filtro persistente por nivel
+            item.addEventListener('click', () => {
+                if (this.activeTier === tierId) {
+                    // Desactivar filtro
+                    this.activeTier = null;
+                    item.classList.remove('is-active');
+                } else {
+                    // Activar este nivel y desactivar otros
+                    legendItems.forEach(i => i.classList.remove('is-active'));
+                    this.activeTier = tierId;
+                    item.classList.add('is-active');
+                }
+                this.applyFilters();
             });
         });
     },

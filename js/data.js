@@ -11,13 +11,13 @@
  */
 
 const CocaColaData = {
-    // Categorías de consumo para la visualización
+    // Categorías de consumo para la visualización (Escala Secuencial Monocromática Rojo Coca-Cola)
     TIERS: {
-        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 400 porciones/año', color: '#E50914' },
-        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '250 - 399 porciones/año', color: '#FF4D4D' },
-        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '120 - 249 porciones/año', color: '#FFA94D' },
-        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '40 - 119 porciones/año', color: '#FFE066' },
-        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '0 - 39 porciones/año',   color: '#6B7280' }
+        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 400 porciones/año', color: '#FF4D55' },
+        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '250 - 399 porciones/año', color: '#E71D28' },
+        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '120 - 249 porciones/año', color: '#B81923' },
+        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '40 - 119 porciones/año', color: '#7E1A22' },
+        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '0 - 39 porciones/año',   color: '#4A181C' }
     },
 
     // Diccionario completo de nombres de países en español (180 países del SVG)
@@ -125,7 +125,7 @@ const CocaColaData = {
     LITERS_PER_SERVING: 0.2365882,
     // Año que se usa para colorear el mapa y armar el ranking
     DATA_YEAR: 2011,
-    NO_DATA_COLOR: '#2A2020',
+    NO_DATA_COLOR: '#241E1E',
 
     _ranking: null,
 
@@ -259,8 +259,54 @@ const CocaColaData = {
         return levelKey ? (this.TIERS[levelKey]?.color || this.NO_DATA_COLOR) : this.NO_DATA_COLOR;
     },
 
-    getTopCountries: function (limit = 5) {
-        return this.getRanking().slice(0, limit).map(code => this.getCountry(code));
+    /**
+     * Devuelve el Top de países ordenados por consumo.
+     * Si se especifica un continente (distinto a 'Todos'), filtra exclusivamente los países de ese continente.
+     */
+    getTopCountries: function (limit = 5, continent = 'Todos') {
+        let codes = this.getRanking();
+        if (continent && continent !== 'Todos') {
+            codes = codes.filter(code => this.continentMapping[code] === continent);
+        }
+        return codes.slice(0, limit).map((code, index) => {
+            const country = this.getCountry(code);
+            return {
+                ...country,
+                regionalRank: index + 1
+            };
+        });
+    },
+
+    /**
+     * Calcula métricas analíticas agregadas para un continente o global.
+     */
+    getContinentStats: function (continent = 'Todos') {
+        const dataset = this.getDataset();
+        const year = this.DATA_YEAR;
+        if (!dataset || !dataset.countries) return null;
+
+        let codes = this.getRanking();
+        if (continent && continent !== 'Todos') {
+            codes = codes.filter(code => this.continentMapping[code] === continent);
+        }
+
+        if (codes.length === 0) {
+            return {
+                count: 0,
+                avgServings: 0,
+                topCountry: null
+            };
+        }
+
+        const totalServings = codes.reduce((acc, code) => acc + (dataset.countries[code]?.[year] || 0), 0);
+        const avgServings = Math.round(totalServings / codes.length);
+
+        return {
+            continent: continent,
+            count: codes.length,
+            avgServings: avgServings,
+            topCountry: this.getCountry(codes[0])
+        };
     }
 };
 
