@@ -14,6 +14,7 @@ const MapModule = {
     svgElement: null,
     tooltipElement: null,
     activeContinent: 'Todos',
+    activeTier: null,
     currentHoveredCountryId: null,
 
     init: function () {
@@ -59,7 +60,7 @@ const MapModule = {
             // Color según el nivel de consumo del dataset; países sin dato quedan con color base
             const level = countryData && countryData.level ? countryData.level : 'sin_datos';
             path.setAttribute('data-level', level);
-            path.style.fill = window.CocaColaData ? window.CocaColaData.getColorByLevel(countryData?.level) : '#2A2020';
+            path.style.fill = window.CocaColaData ? window.CocaColaData.getColorByLevel(countryData?.level) : '#241E1E';
         });
     },
 
@@ -82,7 +83,7 @@ const MapModule = {
                 // 1. Iluminar país en hover
                 this.highlightCountry(countryId);
 
-                // 2. Mostrar recuadros en el Tooltip
+                // 2. Mostrar Tooltip optimizado
                 this.showTooltip(countryData);
                 this.updateTooltipPosition(e);
 
@@ -90,9 +91,6 @@ const MapModule = {
                 if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
                     window.SoundEngine.playBurpForCountry(countryData);
                 }
-
-                // 4. Actualizar recuadro lateral
-                this.updateSidebarCountryInfo(countryData);
             });
 
             path.addEventListener('mousemove', (e) => {
@@ -133,7 +131,7 @@ const MapModule = {
     },
 
     /**
-     * Muestra el Tooltip con los recuadros/espacios preparados.
+     * Muestra el Tooltip informativo de forma minimalista y concisa.
      */
     showTooltip: function (data) {
         if (!this.tooltipElement) return;
@@ -141,6 +139,16 @@ const MapModule = {
         const tier = window.CocaColaData ? window.CocaColaData.getTierConfig(data.level) : {};
         const servings = data.consumptionServings !== undefined ? data.consumptionServings : '---';
         const liters = data.consumptionLiters !== undefined ? data.consumptionLiters : '---';
+
+        const tierBadge = data.hasData ? `
+            <div class="tooltip-tier-badge" style="background: ${tier.color}24; border: 1px solid ${tier.color}; color: #FFFFFF;">
+                ${tier.label}
+            </div>
+        ` : `
+            <div class="tooltip-tier-badge" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted);">
+                Sin datos en la fuente
+            </div>
+        `;
 
         this.tooltipElement.innerHTML = `
             <div class="tooltip-header">
@@ -151,25 +159,24 @@ const MapModule = {
                 </div>
             </div>
             
-            <div class="tooltip-tier-badge placeholder-badge">
-                ${tier.label || '[Espacio: Nivel de Consumo]'}
-            </div>
+            ${tierBadge}
 
             <div class="tooltip-metrics">
-                <div class="metric-item placeholder-box">
+                <div class="metric-item">
                     <span class="metric-value">${servings}</span>
-                    <span class="metric-label">Porciones de 8 oz por persona / año</span>
+                    <span class="metric-label">Porciones / año</span>
                 </div>
-                <div class="metric-item placeholder-box">
+                <div class="metric-item">
                     <span class="metric-value">${liters}</span>
-                    <span class="metric-label">Litros por persona / año</span>
+                    <span class="metric-label">Litros / año</span>
                 </div>
             </div>
 
-            <div class="tooltip-fact placeholder-box">
-                <span class="placeholder-tag">[Recuadro de Información]</span>
-                <p>${data.fact || 'Espacio reservado para la información de Sebastián Valencia.'}</p>
-            </div>
+            ${data.hasData && data.fact ? `
+                <div class="tooltip-fact">
+                    <p>${data.fact}</p>
+                </div>
+            ` : ''}
         `;
 
         this.tooltipElement.classList.add('visible');
@@ -178,24 +185,27 @@ const MapModule = {
     updateTooltipPosition: function (e) {
         if (!this.tooltipElement) return;
 
-        const offset = 16;
-        let x = e.clientX + offset;
-        let y = e.clientY + offset;
+        if (this._rafTooltip) cancelAnimationFrame(this._rafTooltip);
+        this._rafTooltip = requestAnimationFrame(() => {
+            const offset = 14;
+            let x = e.clientX + offset;
+            let y = e.clientY + offset;
 
-        const tooltipRect = this.tooltipElement.getBoundingClientRect();
-        const winWidth = window.innerWidth;
-        const winHeight = window.innerHeight;
+            const tooltipWidth = 280;
+            const tooltipHeight = 160;
+            const winWidth = window.innerWidth;
+            const winHeight = window.innerHeight;
 
-        if (x + tooltipRect.width > winWidth - 12) {
-            x = e.clientX - tooltipRect.width - offset;
-        }
+            if (x + tooltipWidth > winWidth - 12) {
+                x = e.clientX - tooltipWidth - offset;
+            }
 
-        if (y + tooltipRect.height > winHeight - 12) {
-            y = e.clientY - tooltipRect.height - offset;
-        }
+            if (y + tooltipHeight > winHeight - 12) {
+                y = e.clientY - tooltipHeight - offset;
+            }
 
-        this.tooltipElement.style.left = `${Math.max(8, x)}px`;
-        this.tooltipElement.style.top = `${Math.max(8, y)}px`;
+            this.tooltipElement.style.transform = `translate3d(${Math.max(8, x)}px, ${Math.max(8, y)}px, 0)`;
+        });
     },
 
     hideTooltip: function () {
@@ -218,26 +228,49 @@ const MapModule = {
         });
     },
 
-    filterByContinent: function (continent) {
-        this.activeContinent = continent;
+    applyFilters: function () {
         const paths = this.svgElement.querySelectorAll('path.country-path');
-
         paths.forEach(path => {
             const countryContinent = path.getAttribute('data-continent');
-            if (continent === 'Todos' || countryContinent === continent) {
+            const countryTier = path.getAttribute('data-level');
+
+            const matchesContinent = (this.activeContinent === 'Todos' || countryContinent === this.activeContinent);
+            const matchesTier = (!this.activeTier || countryTier === this.activeTier);
+
+            if (matchesContinent && matchesTier) {
                 path.classList.remove('is-dimmed');
+                if (this.activeTier) {
+                    path.classList.add('is-tier-highlighted');
+                } else {
+                    path.classList.remove('is-tier-highlighted');
+                }
             } else {
                 path.classList.add('is-dimmed');
+                path.classList.remove('is-tier-highlighted');
             }
         });
+    },
+
+    filterByContinent: function (continent) {
+        this.activeContinent = continent;
+        this.applyFilters();
 
         const banner = document.getElementById('continent-banner-info');
         if (banner) {
             if (continent === 'Todos') {
-                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver su recuadro</span>`;
+                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas</span>`;
             } else {
-                banner.innerHTML = `<span>Continente seleccionado: <strong>${continent}</strong></span>`;
+                const stats = window.CocaColaData ? window.CocaColaData.getContinentStats(continent) : null;
+                const statsText = stats && stats.count > 0
+                    ? ` &bull; <strong>${stats.count}</strong> países reportados &bull; Promedio: <strong>${stats.avgServings}</strong> porciones/año`
+                    : ' &bull; Sin países reportados en la fuente';
+                banner.innerHTML = `<span>Continente: <strong>${continent}</strong>${statsText}</span>`;
             }
+        }
+
+        // Coordinación analítica: Actualizar Top 5 del continente
+        if (typeof window.renderTopRanking === 'function') {
+            window.renderTopRanking(continent);
         }
     },
 
@@ -245,67 +278,44 @@ const MapModule = {
         const legendItems = document.querySelectorAll('.legend-tier');
 
         legendItems.forEach(item => {
+            const tierId = item.getAttribute('data-tier');
+
+            // 1. Hover temporal (Brushing sobre el mapa)
             item.addEventListener('mouseenter', () => {
-                const tierId = item.getAttribute('data-tier');
+                if (this.activeTier) return; // Si hay filtro fijo por click, respetar el estado
                 const paths = this.svgElement.querySelectorAll('path.country-path');
                 paths.forEach(path => {
-                    if (path.getAttribute('data-level') === tierId) {
+                    const matchesContinent = (this.activeContinent === 'Todos' || path.getAttribute('data-continent') === this.activeContinent);
+                    if (path.getAttribute('data-level') === tierId && matchesContinent) {
                         path.classList.add('is-tier-highlighted');
+                        path.classList.remove('is-dimmed');
                     } else {
                         path.classList.add('is-dimmed');
+                        path.classList.remove('is-tier-highlighted');
                     }
                 });
             });
 
             item.addEventListener('mouseleave', () => {
-                const paths = this.svgElement.querySelectorAll('path.country-path');
-                paths.forEach(path => {
-                    path.classList.remove('is-tier-highlighted');
-                    if (this.activeContinent !== 'Todos') {
-                        if (path.getAttribute('data-continent') !== this.activeContinent) {
-                            path.classList.add('is-dimmed');
-                        }
-                    } else {
-                        path.classList.remove('is-dimmed');
-                    }
-                });
+                if (this.activeTier) return; // Si hay filtro fijo por click, no resetear
+                this.applyFilters();
+            });
+
+            // 2. Click para alternar filtro persistente por nivel
+            item.addEventListener('click', () => {
+                if (this.activeTier === tierId) {
+                    // Desactivar filtro
+                    this.activeTier = null;
+                    item.classList.remove('is-active');
+                } else {
+                    // Activar este nivel y desactivar otros
+                    legendItems.forEach(i => i.classList.remove('is-active'));
+                    this.activeTier = tierId;
+                    item.classList.add('is-active');
+                }
+                this.applyFilters();
             });
         });
-    },
-
-    /**
-     * Actualiza el recuadro lateral para el país seleccionado.
-     */
-    updateSidebarCountryInfo: function (data) {
-        const infoBox = document.getElementById('featured-country-card');
-        if (!infoBox) return;
-
-        const servings = data.consumptionServings !== undefined ? data.consumptionServings : '---';
-        const liters = data.consumptionLiters !== undefined ? data.consumptionLiters : '---';
-
-        infoBox.innerHTML = `
-            <div class="featured-header">
-                <span class="featured-flag">${data.flag || '🏳️'}</span>
-                <div>
-                    <h4>${data.name}</h4>
-                    <span class="featured-sub">${data.continent}</span>
-                </div>
-            </div>
-            <div class="featured-stat-row">
-                <div class="featured-stat placeholder-box">
-                    <span class="f-num">${servings}</span>
-                    <span class="f-lbl">Porciones de 8 oz por persona / año</span>
-                </div>
-                <div class="featured-stat placeholder-box">
-                    <span class="f-num">${liters}</span>
-                    <span class="f-lbl">Litros por persona / año</span>
-                </div>
-            </div>
-            <div class="featured-fact placeholder-box">
-                <span class="placeholder-tag">[Recuadro de Información]</span>
-                <p>${data.fact || 'Espacio reservado para la información de Sebastián Valencia.'}</p>
-            </div>
-        `;
     }
 };
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -20,21 +20,6 @@
                     <h1><span class="coca-brand">Coca-Cola</span> &bull; Mapa Global de Consumo</h1>
                     <p>Visualización interactiva por continentes y países</p>
                 </div>
-            </div>
-            <div class="team-credits">
-                <div class="credit-badge dev1">
-                    <strong>Vicente Meza</strong>
-                    <span>Frontend & Mapa Visual</span>
-                </div>
-                <div class="credit-badge">
-                    <strong>Sebastián Valencia</strong>
-                    <span>Datos de Consumo</span>
-                </div>
-                <div class="credit-badge">
-                    <strong>Martín Concha</strong>
-                    <span>Audio & Eructos</span>
-                </div>
-            </div>
         </header>
 
         <!-- Barra de Navegación por Continentes -->
@@ -48,11 +33,6 @@
                 <button class="continent-btn" data-continent="África">🌍 África</button>
                 <button class="continent-btn" data-continent="Asia">🌏 Asia</button>
                 <button class="continent-btn" data-continent="Oceanía">🌏 Oceanía</button>
-            </div>
-
-            <div class="status-badge-visual">
-                <span class="status-indicator-dot"></span>
-                <span>Modo Interactivo Activo</span>
             </div>
         </section>
 
@@ -475,33 +455,44 @@
 
                 </div>
 
-                <!-- Barra de Leyenda de Consumo (Choropleth) -->
+                <!-- Barra de Leyenda de Consumo (Escala Secuencial Monocromática Rojo Coca-Cola) -->
                 <div class="legend-bar">
-                    <span class="legend-title">Nivel de Consumo:</span>
-                    <div class="legend-tiers">
-                        <div class="legend-tier" data-tier="muy_alto">
-                            <span class="color-swatch" style="background-color: var(--tier-muy-alto);"></span>
-                            <span>Muy Alto (≥400)</span>
-                        </div>
-                        <div class="legend-tier" data-tier="alto">
-                            <span class="color-swatch" style="background-color: var(--tier-alto);"></span>
-                            <span>Alto (250-399)</span>
-                        </div>
-                        <div class="legend-tier" data-tier="medio">
-                            <span class="color-swatch" style="background-color: var(--tier-medio);"></span>
-                            <span>Medio (120-249)</span>
-                        </div>
-                        <div class="legend-tier" data-tier="bajo">
-                            <span class="color-swatch" style="background-color: var(--tier-bajo);"></span>
-                            <span>Bajo (40-119)</span>
-                        </div>
-                        <div class="legend-tier" data-tier="muy_bajo">
-                            <span class="color-swatch" style="background-color: var(--tier-muy-bajo);"></span>
-                            <span>Muy Bajo (&lt;40)</span>
-                        </div>
-                        <div class="legend-tier" data-tier="sin_datos">
-                            <span class="color-swatch" style="background-color: #2A2020; border: 1px solid rgba(255,255,255,0.25);"></span>
-                            <span>Sin datos</span>
+                    <div class="legend-header">
+                        <span class="legend-title">Nivel de Consumo (Porciones / año)</span>
+                        <span class="legend-hint">Haz clic o pasa el mouse sobre un nivel para filtrar en el mapa</span>
+                    </div>
+                    <div class="legend-ramp-wrapper">
+                        <div class="legend-tiers">
+                            <div class="legend-tier" data-tier="muy_bajo" title="0 a 39 porciones/año">
+                                <span class="color-swatch" style="background-color: var(--tier-muy-bajo);"></span>
+                                <span class="tier-label">Muy Bajo</span>
+                                <span class="tier-range">(&lt;40)</span>
+                            </div>
+                            <div class="legend-tier" data-tier="bajo" title="40 a 119 porciones/año">
+                                <span class="color-swatch" style="background-color: var(--tier-bajo);"></span>
+                                <span class="tier-label">Bajo</span>
+                                <span class="tier-range">(40-119)</span>
+                            </div>
+                            <div class="legend-tier" data-tier="medio" title="120 a 249 porciones/año">
+                                <span class="color-swatch" style="background-color: var(--tier-medio);"></span>
+                                <span class="tier-label">Medio</span>
+                                <span class="tier-range">(120-249)</span>
+                            </div>
+                            <div class="legend-tier" data-tier="alto" title="250 a 399 porciones/año">
+                                <span class="color-swatch" style="background-color: var(--tier-alto);"></span>
+                                <span class="tier-label">Alto</span>
+                                <span class="tier-range">(250-399)</span>
+                            </div>
+                            <div class="legend-tier" data-tier="muy_alto" title="≥ 400 porciones/año">
+                                <span class="color-swatch" style="background-color: var(--tier-muy-alto);"></span>
+                                <span class="tier-label">Muy Alto</span>
+                                <span class="tier-range">(≥400)</span>
+                            </div>
+                            <div class="legend-divider"></div>
+                            <div class="legend-tier tier-no-data" data-tier="sin_datos" title="Sin datos registrados">
+                                <span class="color-swatch" style="background-color: var(--tier-sin-datos); border: 1px solid rgba(255,255,255,0.25);"></span>
+                                <span class="tier-label">Sin datos</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -519,41 +510,22 @@
             <aside class="sidebar-panel">
                 <!-- Podio Top 5 -->
                 <div class="sidebar-card">
-                    <h3>🏆 Top Consumo Global</h3>
+                    <h3 id="ranking-card-title">🏆 Top Consumo Global</h3>
+                    <div id="ranking-subtitle-container" class="ranking-subtitle-note">
+                        <span>Mayores consumidores mundiales</span>
+                    </div>
                     <ul id="top-ranking-list" class="ranking-list">
                         <!-- Generado dinámicamente -->
                     </ul>
                 </div>
 
-                <!-- Tarjeta de País en Foco -->
-                <div class="sidebar-card">
-                    <h3>🥤 [Recuadro: País en Foco]</h3>
-                    <div id="featured-country-card">
-                        <div class="empty-state-card">
-                            <span class="empty-state-icon">🗺️</span>
-                            <h4>[Sin país seleccionado]</h4>
-                            <p>Pasa el mouse sobre cualquier país del mapa para desplegar su recuadro de métricas e información.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Guía de Navegación -->
-                <div class="sidebar-card">
-                    <h3>💡 Guía Visual</h3>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 8px;">
-                        <strong>Pasa el mouse:</strong> Coloca el cursor sobre cualquier país del mapa para desplegar su tarjeta con métricas de consumo en tiempo real.
-                    </p>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">
-                        <strong>Filtra por continente:</strong> Haz clic en los botones superiores para resaltar una región específica del mundo.
-                    </p>
-                </div>
             </aside>
         </main>
 
         <!-- Pie de Página -->
         <footer class="main-footer">
-            <span>Proyecto de InfoVis 2026 &bull; Vicente Meza, Sebastián Valencia, Martín Concha</span>
-            <span>Frontend y Visualización desarrollado por Vicente Meza</span>
+            <span>Proyecto de InfoVis 2026 &bull; Visualización de Consumo Global</span>
+            <span>Vicente Meza &bull; Sebastián Valencia &bull; Martín Concha</span>
         </footer>
     </div>
 
