@@ -1,6 +1,8 @@
 # Visualización de Consumo Global de Coca-Cola 🥤🌍
 **Proyecto de InfoVis 2026**
 
+🔗 **Versión final en GitHub Pages:** https://vm-gonzalez.github.io/proyecto_infovis2026/
+
 Aplicación web interactiva que visualiza los niveles de consumo de Coca-Cola por país a nivel mundial mediante un mapa interactivo por continentes con efectos visuales de hover.
 
 ## 👥 Equipo y Responsabilidades
