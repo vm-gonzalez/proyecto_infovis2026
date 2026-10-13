@@ -1,26 +1,26 @@
 /**
  * ====================================================================
  * PROYECTO INFOVIS 2026 - VISUALIZACIÓN DE CONSUMO MUNDIAL DE COCA-COLA
- * Módulo de Datos: Sebastián Valencia (Estructura & Nomenclatura Geográfica)
+ * Módulo de Datos: Estructura, Nomenclatura Geográfica y Métricas Totales
  * ====================================================================
  * Contiene el registro de nombres completos en español y continentes
  * para los 180 países del mapa SVG, y cruza cada país con el dataset de
- * consumo per cápita (data/coca-cola-per-capita.js).
+ * consumo total en litros (data/coca-cola-per-capita.js).
+ * Fuente: World Population Review (2026), Coca-Cola Consumption by Country.
  *
  * Países sin dato en la fuente se devuelven con `hasData: false` y "Sin datos".
  */
 
 const CocaColaData = {
-    // Categorías de consumo para la visualización (Escala Secuencial Monocromática Rojo Coca-Cola)
+    // Categorías de consumo total en litros (Escala Secuencial Monocromática Rojo Coca-Cola)
     TIERS: {
-        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 400 porciones/año', color: '#F40009' },
-        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '250 - 399 porciones/año', color: '#CF131C' },
-        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '120 - 249 porciones/año', color: '#9E181F' },
-        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '40 - 119 porciones/año', color: '#66191E' },
-        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '0 - 39 porciones/año',   color: '#3A1417' }
+        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 5,0 B L',       color: '#F40009' },
+        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '2,0 - 4,9 B L',   color: '#CF131C' },
+        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '1,0 - 1,9 B L',   color: '#9E181F' },
+        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '200 - 900 M L',   color: '#66191E' },
+        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '100 M L',         color: '#3A1417' }
     },
 
-    // Diccionario completo de nombres de países en español (180 países del SVG)
     countryNames: {
         ae: 'Emiratos Árabes Unidos', af: 'Afganistán', al: 'Albania', am: 'Armenia',
         ao: 'Angola', ar: 'Argentina', at: 'Austria', au: 'Australia', az: 'Azerbaiyán',
@@ -30,7 +30,7 @@ const CocaColaData = {
         bz: 'Belice', ca: 'Canadá', cd: 'República Democrática del Congo',
         cf: 'República Centroafricana', cg: 'República del Congo', ch: 'Suiza',
         ci: 'Costa de Marfil', cl: 'Chile', cm: 'Camerún', cn: 'China', co: 'Colombia',
-        cr: 'Costa Rica', cu: 'Cuba', cv: 'Cabo Verde', cy: 'Chipre', cz: 'República Checa',
+        cr: 'Costa Rica', cu: 'Cuba', cv: 'Cabo Verde', cy: 'Chipre', cz: 'Chequia',
         de: 'Alemania', dj: 'Yibuti', dk: 'Dinamarca', dm: 'Dominica', do: 'República Dominicana',
         dz: 'Argelia', ec: 'Ecuador', ee: 'Estonia', eg: 'Egipto', er: 'Eritrea',
         es: 'España', et: 'Etiopía', fi: 'Finlandia', fk: 'Islas Malvinas', fr: 'Francia',
@@ -64,7 +64,6 @@ const CocaColaData = {
         vu: 'Vanuatu', ye: 'Yemen', za: 'Sudáfrica', zm: 'Zambia', zw: 'Zimbabue'
     },
 
-    // Continente asignado para cada país del SVG
     continentMapping: {
         // América del Sur
         ar: 'América del Sur', bo: 'América del Sur', br: 'América del Sur',
@@ -108,7 +107,7 @@ const CocaColaData = {
 
         // Asia
         ae: 'Asia', af: 'Asia', am: 'Asia', az: 'Asia', bd: 'Asia', bn: 'Asia',
-        bt: 'Asia', cn: 'Asia', ge: 'Asia', id: 'Asia', il: 'Asia', in: 'Asia',
+        bt: 'Asia', cn: 'Asia', ge: 'Asia', hk: 'Asia', id: 'Asia', il: 'Asia', in: 'Asia',
         iq: 'Asia', ir: 'Asia', jo: 'Asia', jp: 'Asia', kg: 'Asia', kh: 'Asia',
         kp: 'Asia', kr: 'Asia', kw: 'Asia', kz: 'Asia', la: 'Asia', lb: 'Asia',
         lk: 'Asia', mm: 'Asia', mn: 'Asia', mv: 'Asia', my: 'Asia', np: 'Asia',
@@ -121,10 +120,6 @@ const CocaColaData = {
         vu: 'Oceanía'
     },
 
-    // 1 porción = 8 onzas líquidas EE.UU. = 0,2365882 litros
-    LITERS_PER_SERVING: 0.2365882,
-    // Año que se usa para colorear el mapa y armar el ranking
-    DATA_YEAR: 2011,
     NO_DATA_COLOR: '#241E1E',
 
     _ranking: null,
@@ -141,12 +136,16 @@ const CocaColaData = {
         return typeof value === 'number' && Number.isFinite(value);
     },
 
-    getLevel: function (servings) {
-        if (!this.isValidNumber(servings)) return null;
-        if (servings >= 400) return 'muy_alto';
-        if (servings >= 250) return 'alto';
-        if (servings >= 120) return 'medio';
-        if (servings >= 40) return 'bajo';
+    /**
+     * Clasifica el consumo en miles de millones de litros (litersBillions)
+     * en uno de los 5 niveles del choropleth (compatibles con SoundEngine).
+     */
+    getLevel: function (litersBillions) {
+        if (!this.isValidNumber(litersBillions)) return null;
+        if (litersBillions >= 5.0) return 'muy_alto';
+        if (litersBillions >= 2.0) return 'alto';
+        if (litersBillions >= 1.0) return 'medio';
+        if (litersBillions >= 0.2) return 'bajo';
         return 'muy_bajo';
     },
 
@@ -157,7 +156,7 @@ const CocaColaData = {
      */
     getFlag: function (code) {
         if (!/^[a-z]{2}$/.test(code)) return '🏳️';
-        return `<img class="flag-img" src="https://flagcdn.com/w80/${code}.png" alt="" loading="lazy" onerror="this.replaceWith('🏳️')">`;
+        return `<img class="flag-img" src="https://flagcdn.com/w80/${code}.png" alt="Bandera" loading="lazy" onerror="this.onerror=null;this.replaceWith('🏳️')">`;
     },
 
     formatNumber: function (value, decimals = 0) {
@@ -165,17 +164,16 @@ const CocaColaData = {
     },
 
     /**
-     * Códigos de los países con dato válido en DATA_YEAR, de mayor a menor consumo.
+     * Códigos de los países con dato válido ordenados de mayor a menor consumo total.
      */
     getRanking: function () {
         if (this._ranking) return this._ranking;
         const dataset = this.getDataset();
-        const year = this.DATA_YEAR;
         if (!dataset || !dataset.countries) return [];
 
         this._ranking = Object.keys(dataset.countries)
-            .filter(code => this.isValidNumber(dataset.countries[code]?.[year]))
-            .sort((a, b) => dataset.countries[b][year] - dataset.countries[a][year]);
+            .filter(code => this.isValidNumber(dataset.countries[code]?.litersBillions))
+            .sort((a, b) => dataset.countries[a].rank - dataset.countries[b].rank);
         return this._ranking;
     },
 
@@ -213,46 +211,41 @@ const CocaColaData = {
         // 3. Buscar el consumo en el dataset
         const dataset = this.getDataset();
         const record = dataset?.countries?.[normalized];
-        const servings = record?.[this.DATA_YEAR];
 
-        if (!this.isValidNumber(servings)) {
+        if (!record || !this.isValidNumber(record.litersBillions)) {
             return {
                 ...base,
                 hasData: false,
                 rank: '--',
-                servings: null,
-                consumptionServings: 'Sin datos',
-                consumptionLiters: 'Sin datos',
+                litersBillions: null,
+                litersTotal: null,
+                consumption: 'Sin datos',
+                consumptionFormatted: 'Sin datos',
                 level: null,
-                fact: dataset
-                    ? `The Coca-Cola Company no publica el consumo per cápita de este país en su tabla de ${dataset.source.year}.`
-                    : 'No se pudo cargar el dataset de consumo.'
+                fact: 'Este país no figura en la lista de consumo reportada por World Population Review.'
             };
         }
 
-        const history = dataset.source.years
-            .map(year => `${year}: ${this.isValidNumber(record[year]) ? this.formatNumber(record[year]) : 'N/D'}`)
-            .join(' · ');
-        const worldAvg = dataset.worldwide?.[this.DATA_YEAR];
-        const worldText = this.isValidNumber(worldAvg)
-            ? ` Promedio mundial ${this.DATA_YEAR}: ${this.formatNumber(worldAvg)}.`
-            : '';
+        const level = this.getLevel(record.litersBillions);
+        const formattedTotal = record.litersTotal ? this.formatNumber(record.litersTotal) + ' Litros' : record.consumption;
 
         return {
             ...base,
             hasData: true,
-            rank: this.getRanking().indexOf(normalized) + 1,
-            servings: servings,
-            consumptionServings: this.formatNumber(servings),
-            consumptionLiters: this.formatNumber(servings * this.LITERS_PER_SERVING, 1),
-            level: this.getLevel(servings),
-            fact: `Porciones de 8 oz por persona — ${history}.${worldText}`
+            rank: record.rank,
+            litersBillions: record.litersBillions,
+            litersTotal: record.litersTotal,
+            consumption: record.consumption,
+            consumptionFormatted: record.consumption,
+            litersTotalFormatted: formattedTotal,
+            level: level,
+            fact: `Volumen total anual: ${record.consumption} (${formattedTotal}) según World Population Review 2026.`
         };
     },
 
     getTierConfig: function (levelKey) {
-        if (!levelKey) return { label: 'Sin datos', color: this.NO_DATA_COLOR };
-        return this.TIERS[levelKey] || { label: 'Sin datos', color: this.NO_DATA_COLOR };
+        if (!levelKey) return { label: 'Sin datos', color: this.NO_DATA_COLOR, range: 'Sin registro' };
+        return this.TIERS[levelKey] || { label: 'Sin datos', color: this.NO_DATA_COLOR, range: 'Sin registro' };
     },
 
     getColorByLevel: function (levelKey) {
@@ -261,9 +254,10 @@ const CocaColaData = {
 
     /**
      * Devuelve el Top de países ordenados por consumo.
+     * Por defecto retorna 6 países (o menos si el continente tiene menos).
      * Si se especifica un continente (distinto a 'Todos'), filtra exclusivamente los países de ese continente.
      */
-    getTopCountries: function (limit = 5, continent = 'Todos') {
+    getTopCountries: function (limit = 6, continent = 'Todos') {
         let codes = this.getRanking();
         if (continent && continent !== 'Todos') {
             codes = codes.filter(code => this.continentMapping[code] === continent);
@@ -282,7 +276,6 @@ const CocaColaData = {
      */
     getContinentStats: function (continent = 'Todos') {
         const dataset = this.getDataset();
-        const year = this.DATA_YEAR;
         if (!dataset || !dataset.countries) return null;
 
         let codes = this.getRanking();
@@ -292,19 +285,25 @@ const CocaColaData = {
 
         if (codes.length === 0) {
             return {
+                continent: continent,
                 count: 0,
-                avgServings: 0,
+                totalFormatted: '0 L',
                 topCountry: null
             };
         }
 
-        const totalServings = codes.reduce((acc, code) => acc + (dataset.countries[code]?.[year] || 0), 0);
-        const avgServings = Math.round(totalServings / codes.length);
+        const totalBillions = codes.reduce((acc, code) => acc + (dataset.countries[code]?.litersBillions || 0), 0);
+        let totalFormatted = '';
+        if (totalBillions >= 1.0) {
+            totalFormatted = this.formatNumber(totalBillions, 1) + ' B L';
+        } else {
+            totalFormatted = this.formatNumber(Math.round(totalBillions * 1000)) + ' M L';
+        }
 
         return {
             continent: continent,
             count: codes.length,
-            avgServings: avgServings,
+            totalFormatted: totalFormatted,
             topCountry: this.getCountry(codes[0])
         };
     }

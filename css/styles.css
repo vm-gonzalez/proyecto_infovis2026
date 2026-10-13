@@ -205,58 +205,64 @@ body {
     font-weight: 700;
 }
 
-/* --- Contenedor Principal: Mapa + Sidebar (FIJO sin saltos) --- */
-.content-grid {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 16px;
-    align-items: start;
+/* --- Contenedor Principal: Flujo Vertical Hero + Top 6 Inferior --- */
+.main-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
 }
 
-/* --- Área del Mapa SVG Fija --- */
-.map-panel {
+/* --- Sección Hero: Mapa Mundial Completo --- */
+.hero-map-section {
     background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: 18px;
+    border: 1px solid var(--border-accent);
+    border-radius: 20px;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(244, 0, 9, 0.12);
+    width: 100%;
 }
 
 .continent-info-banner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 18px;
-    background: rgba(0, 0, 0, 0.35);
+    padding: 12px 22px;
+    background: rgba(0, 0, 0, 0.45);
     border-bottom: 1px solid var(--border-subtle);
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     color: var(--text-secondary);
-    min-height: 42px;
+    min-height: 44px;
     box-sizing: border-box;
 }
 
-/* Altura fija: evita saltos */
+/* Área del Mapa en Hero: Máxima visibilidad y centrado */
 .map-view-wrapper {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 14px;
-    height: 500px;
-    min-height: 500px;
-    max-height: 500px;
+    padding: 16px 20px;
+    width: 100%;
+    min-height: 520px;
+    height: 58vh;
+    max-height: 640px;
     overflow: hidden;
     box-sizing: border-box;
+    background: radial-gradient(circle at 50% 50%, rgba(35, 18, 20, 0.6) 0%, rgba(15, 11, 12, 0.95) 100%);
 }
 
 #world-map {
     width: 100%;
     height: 100%;
-    max-height: 470px;
+    max-width: 1180px;
+    max-height: 100%;
     display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
 }
 
 /* --- Estilos SVG para cada país (Optimizado para 60fps) --- */
@@ -407,109 +413,246 @@ body {
     text-decoration: underline;
 }
 
-/* --- Panel Lateral (Sidebar) --- */
-.sidebar-panel {
+/* --- Sección Inferior: Top 6 Países con Mayor Consumo --- */
+.top-countries-section {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-accent);
+    border-radius: 20px;
+    padding: 22px 24px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
     display: flex;
     flex-direction: column;
     gap: 16px;
+    width: 100%;
 }
 
-.sidebar-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: 16px;
-    padding: 18px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-}
-
-.sidebar-card h3 {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.ranking-subtitle-note {
-    font-size: 0.73rem;
-    color: var(--text-muted);
-    margin-top: -6px;
-    margin-bottom: 10px;
+.top-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 14px;
 }
 
-/* Lista Top 5 (Placeholders / Recuadros interactivos) */
-.ranking-list {
-    list-style: none;
+.top-title-group h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.3px;
+}
+
+.top-filter-indicator {
+    background: rgba(244, 0, 9, 0.16);
+    border: 1px solid var(--coca-red);
+    color: #FFFFFF;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(244, 0, 9, 0.28);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Grilla de los 6 Países */
+.top-countries-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    width: 100%;
+}
+
+.no-top-countries {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 30px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* Tarjeta individual de país */
+.top-country-card {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 14px 12px;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}
+
+.top-country-card:hover,
+.top-country-card.is-map-hovered {
+    transform: translateY(-5px);
+    border-color: var(--coca-red);
+    background: #2b191c;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5), 0 0 18px var(--coca-red-glow);
+}
+
+/* Podios 1, 2 y 3 con acentos especiales */
+.top-country-card.rank-1 {
+    border-color: rgba(255, 215, 0, 0.45);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.06) 0%, var(--bg-surface-elevated) 100%);
+}
+
+.top-country-card.rank-2 {
+    border-color: rgba(192, 192, 192, 0.35);
+    background: linear-gradient(180deg, rgba(192, 192, 192, 0.05) 0%, var(--bg-surface-elevated) 100%);
+}
+
+.top-country-card.rank-3 {
+    border-color: rgba(205, 127, 50, 0.35);
+    background: linear-gradient(180deg, rgba(205, 127, 50, 0.05) 0%, var(--bg-surface-elevated) 100%);
+}
+
+.card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-rank-badge {
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--coca-red);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.card-rank-badge.podium-1 {
+    color: #FFD700;
+}
+.card-rank-badge.podium-2 {
+    color: #E0E0E0;
+}
+.card-rank-badge.podium-3 {
+    color: #CD7F32;
+}
+
+.card-continent-tag {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.card-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 8px;
 }
 
-.ranking-item {
+.card-flag-box {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 10px;
-    background: var(--bg-surface-elevated);
-    border: 1px dashed var(--border-dashed);
-    padding: 9px 12px;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-    cursor: pointer;
 }
 
-.ranking-item:hover {
-    background: #251819;
-    border-color: rgba(244, 0, 9, 0.5);
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+.card-flag-img {
+    width: 56px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.2s ease;
 }
 
-.ranking-item.placeholder-ranking {
-    opacity: 0.85;
-    cursor: default;
+.top-country-card:hover .card-flag-img,
+.top-country-card.is-map-hovered .card-flag-img {
+    transform: scale(1.08);
 }
 
-.ranking-pos {
-    font-weight: 800;
-    color: var(--coca-red);
-    font-size: 0.85rem;
-    min-width: 22px;
+.card-country-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
-.ranking-flag {
-    font-size: 1.25rem;
-}
-
-.ranking-info {
-    flex: 1;
+.card-consumption-block {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 9px;
+    padding: 8px 6px;
 }
 
-.ranking-name {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+.card-consumption-val {
+    font-size: 1.22rem;
+    font-weight: 800;
+    color: var(--coca-red);
+    text-shadow: 0 0 10px rgba(244, 0, 9, 0.4);
+    letter-spacing: -0.3px;
 }
 
-.ranking-servings {
-    font-size: 0.72rem;
+.card-consumption-lbl {
+    font-size: 0.65rem;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 2px;
 }
 
-.ranking-pill.placeholder-pill {
-    font-size: 0.74rem;
+.card-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-tier-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
     font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 12px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid;
+    white-space: nowrap;
+}
+
+.tier-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.card-global-ref {
     color: var(--text-muted);
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px dashed var(--border-dashed);
+    font-weight: 600;
+    font-size: 0.7rem;
+    white-space: nowrap;
 }
 
 /* --- Tooltip Flotante de Hover (Optimizado para GPU) --- */
@@ -617,8 +760,53 @@ body {
 }
 
 /* Responsividad */
-@media (max-width: 1100px) {
-    .content-grid {
+@media (max-width: 1200px) {
+    .top-countries-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .map-view-wrapper {
+        height: 52vh;
+        min-height: 440px;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        padding: 12px 14px;
+        gap: 12px;
+    }
+    .main-header {
+        padding: 12px 16px;
+    }
+    .brand-titles h1 {
+        font-size: 1.35rem;
+    }
+    .top-countries-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .map-view-wrapper {
+        height: 44vh;
+        min-height: 340px;
+        padding: 10px;
+    }
+    .legend-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .legend-tiers {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-countries-grid {
         grid-template-columns: 1fr;
+    }
+    .top-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
 }
