@@ -117,32 +117,46 @@ const MapModule = {
         if (!countryId) return;
         const matchingPaths = this.svgElement.querySelectorAll(`path[data-country-id="${countryId}"]`);
         matchingPaths.forEach(p => p.classList.add('is-hovered'));
+
+        // Sincronizar resaltado con la tarjeta correspondiente en el Top 6 si está presente
+        const matchingCard = document.querySelector(`.top-country-card[data-country-id="${countryId}"]`);
+        if (matchingCard) {
+            matchingCard.classList.add('is-map-hovered');
+        }
     },
 
     unhighlightCountry: function (countryId) {
         if (!countryId) return;
         const matchingPaths = this.svgElement.querySelectorAll(`path[data-country-id="${countryId}"]`);
         matchingPaths.forEach(p => p.classList.remove('is-hovered'));
+
+        const matchingCard = document.querySelector(`.top-country-card[data-country-id="${countryId}"]`);
+        if (matchingCard) {
+            matchingCard.classList.remove('is-map-hovered');
+        }
     },
 
     clearAllHighlights: function () {
         const hovered = this.svgElement.querySelectorAll('path.country-path.is-hovered');
         hovered.forEach(p => p.classList.remove('is-hovered'));
+
+        const hoveredCards = document.querySelectorAll('.top-country-card.is-map-hovered');
+        hoveredCards.forEach(c => c.classList.remove('is-map-hovered'));
     },
 
     /**
-     * Muestra el Tooltip informativo de forma minimalista y concisa.
+     * Muestra el Tooltip informativo de forma minimalista y concisa con el consumo total.
      */
     showTooltip: function (data) {
         if (!this.tooltipElement) return;
 
         const tier = window.CocaColaData ? window.CocaColaData.getTierConfig(data.level) : {};
-        const servings = data.consumptionServings !== undefined ? data.consumptionServings : '---';
-        const liters = data.consumptionLiters !== undefined ? data.consumptionLiters : '---';
+        const consumption = data.consumption || 'Sin datos';
+        const rankLabel = data.hasData ? `#${data.rank} a nivel mundial` : 'Sin ranking';
 
         const tierBadge = data.hasData ? `
-            <div class="tooltip-tier-badge" style="background: ${tier.color}24; border: 1px solid ${tier.color}; color: #FFFFFF;">
-                ${tier.label}
+            <div class="tooltip-tier-badge" style="background: ${tier.color}28; border: 1px solid ${tier.color}; color: #FFFFFF;">
+                ${tier.label} &bull; ${tier.range}
             </div>
         ` : `
             <div class="tooltip-tier-badge" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted);">
@@ -163,12 +177,12 @@ const MapModule = {
 
             <div class="tooltip-metrics">
                 <div class="metric-item">
-                    <span class="metric-value">${servings}</span>
-                    <span class="metric-label">Porciones / año</span>
+                    <span class="metric-value">${consumption}</span>
+                    <span class="metric-label">Consumo Total Anual</span>
                 </div>
                 <div class="metric-item">
-                    <span class="metric-value">${liters}</span>
-                    <span class="metric-label">Litros / año</span>
+                    <span class="metric-value">${data.hasData ? '#' + data.rank : '--'}</span>
+                    <span class="metric-label">Ranking Global</span>
                 </div>
             </div>
 
@@ -258,17 +272,17 @@ const MapModule = {
         const banner = document.getElementById('continent-banner-info');
         if (banner) {
             if (continent === 'Todos') {
-                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas</span>`;
+                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas y reproducir audio</span>`;
             } else {
                 const stats = window.CocaColaData ? window.CocaColaData.getContinentStats(continent) : null;
                 const statsText = stats && stats.count > 0
-                    ? ` &bull; <strong>${stats.count}</strong> países reportados &bull; Promedio: <strong>${stats.avgServings}</strong> porciones/año`
+                    ? ` &bull; <strong>${stats.count}</strong> países reportados &bull; Consumo regional: <strong>${stats.totalFormatted}</strong> &bull; Mayor consumidor: <strong>${stats.topCountry?.name}</strong> (${stats.topCountry?.consumption})`
                     : ' &bull; Sin países reportados en la fuente';
                 banner.innerHTML = `<span>Continente: <strong>${continent}</strong>${statsText}</span>`;
             }
         }
 
-        // Coordinación analítica: Actualizar Top 5 del continente
+        // Coordinación analítica: Actualizar Top 6 del continente seleccionado
         if (typeof window.renderTopRanking === 'function') {
             window.renderTopRanking(continent);
         }

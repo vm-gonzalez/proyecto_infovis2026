@@ -3,19 +3,20 @@
 
 🔗 **Versión final en GitHub Pages:** https://vm-gonzalez.github.io/proyecto_infovis2026/
 
-Aplicación web interactiva que visualiza los niveles de consumo de Coca-Cola por país a nivel mundial mediante un mapa interactivo por continentes con efectos visuales de hover.
+Aplicación web interactiva que visualiza los niveles de consumo total de Coca-Cola por país a nivel mundial mediante un mapa interactivo hero a pantalla completa y un panel dinámico de los primeros 6 países con mayor consumo por continente, con banderas e interactividad acústica proporcional.
 
 ## 👥 Equipo y Responsabilidades
-- **Vicente Meza (Frontend Lead)**: Estructura HTML5, diseño y estilos CSS3 temáticos de Coca-Cola, incrustación y renderizado del mapa mundial SVG, interactividad de hover por país y filtros por continente.
-- **Sebastián Valencia (Data & Metrics)**: Recopilación, estructuración y cálculo de métricas de consumo de Coca-Cola por país y continente (`js/data.js`).
-- **Martín Concha (Audio & Sound FX)**: Diseño, integración y reproducción del motor de audio para los efectos de eructos/chanchos proporcionales (`js/audio.js`).
+- **Vicente Meza (Frontend Lead)**: Estructura HTML5 semántica, distribución hero a pantalla completa con grilla dinámica inferior de Top 6 países, diseño y estilos CSS3 temáticos de Coca-Cola, incrustación y renderizado del mapa mundial SVG, interactividad bidireccional de hover y filtros por continente.
+- **Sebastián Valencia (Data & Metrics)**: Recopilación, estructuración y cálculo de métricas de consumo total de Coca-Cola por país y continente (`js/data.js`, `data/coca-cola-per-capita.js`).
+- **Martín Concha (Audio & Sound FX)**: Diseño, integración y reproducción del motor de audio para los efectos de eructos/chanchos proporcionales al volumen de consumo (`js/audio.js`).
 
 ## 📊 Fuente de Datos
-- **The Coca-Cola Company (©2012), *Per Capita Consumption of Company Beverage Products*** — [PDF](https://wonderprofessor.com/121/Chap09/Chap09_CocaCola_2011_PerCapitaConsumption_Growth.pdf).
-- Unidad: porciones de 8 oz (236,6 ml) por persona al año, considerando todas las marcas de la compañía. Años 1991, 2001 y 2011; el mapa usa 2011.
-- Cobertura: 35 países más el promedio mundial (`data/coca-cola-per-capita.js`). Los países que no aparecen en la fuente se muestran como **Sin datos**.
+- **World Population Review (2026), *Coca-Cola Consumption by Country*** — [Enlace oficial](https://worldpopulationreview.com/country-rankings/coca-cola-consumption-by-country).
+- Unidad: Volumen total anual consumido en litros. Expresado en miles de millones de litros (B L) y millones de litros (M L).
+- Cobertura: 96 países reportados con sus banderas oficiales e identificadores ISO. Los países no reportados se indican como **Sin datos**.
 
 ## 🛠️ Tecnologías Frontend
 - HTML5 semántico
-- CSS3 moderno (diseño responsive, efectos de hover con sombras glow, transiciones y animaciones de carbonatación)
-- JavaScript ES6+ (manipulación vectorial SVG y eventos del cursor)
+- CSS3 moderno (diseño responsive en layout hero + cards grid, sombras glow rojo Coca-Cola, transiciones fluidas y animaciones de carbonatación)
+- JavaScript ES6+ (manipulación vectorial SVG, eventos de cursor y coordinación analítica por continentes)
+
