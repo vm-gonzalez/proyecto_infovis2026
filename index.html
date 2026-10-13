@@ -18,24 +18,9 @@
                 <span class="brand-logo-bottle">🥤</span>
                 <div class="brand-titles">
                     <h1><span class="coca-brand">Coca-Cola</span> &bull; Mapa Global de Consumo</h1>
-                    <p>Visualización interactiva del consumo total por país y continente</p>
                 </div>
             </div>
         </header>
-
-        <!-- Barra de Navegación por Continentes -->
-        <section class="toolbar-section">
-            <div class="continent-filters">
-                <span class="filter-label">Continentes:</span>
-                <button class="continent-btn active" data-continent="Todos">🌐 Todos</button>
-                <button class="continent-btn" data-continent="América del Sur">🌎 América del Sur</button>
-                <button class="continent-btn" data-continent="América del Norte">🌎 América del Norte</button>
-                <button class="continent-btn" data-continent="Europa">🌍 Europa</button>
-                <button class="continent-btn" data-continent="África">🌍 África</button>
-                <button class="continent-btn" data-continent="Asia">🌏 Asia</button>
-                <button class="continent-btn" data-continent="Oceanía">🌏 Oceanía</button>
-            </div>
-        </section>
 
         <!-- Contenedor Principal: Hero Mapa Completo + Top 6 Inferior -->
         <main class="main-layout">
@@ -460,7 +445,7 @@
                 <!-- Barra de Leyenda de Consumo Total (Escala Secuencial Monocromática Rojo Coca-Cola) -->
                 <div class="legend-bar">
                     <div class="legend-header">
-                        <span class="legend-title">Nivel de Consumo Total Anual</span>
+                        <span class="legend-title"></span>
                         <span class="legend-hint">Haz clic o pasa el mouse sobre un nivel para filtrar en el mapa</span>
                     </div>
                     <div class="legend-ramp-wrapper">
@@ -517,7 +502,19 @@
                             <span>Los países con mayor volumen total de consumo de Coca-Cola a nivel mundial</span>
                         </div>
                     </div>
-                    <span class="top-filter-indicator" id="top-filter-indicator">🌐 Global</span>
+                    <!-- Filtro Continentes -->
+                    <div class="ranking-filter">
+                        <label for="continent-selector">Continente:</label>
+                        <select id="continent-selector">
+                        <option value="Todos">🌐 Todos</option>
+                        <option value="América del Sur">🌎 América del Sur</option>
+                        <option value="América del Norte">🌎 América del Norte</option>
+                        <option value="Europa">🌍 Europa</option>
+                        <option value="África">🌍 África</option>
+                        <option value="Asia">🌏 Asia</option>
+                        <option value="Oceanía">🌏 Oceanía</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="top-countries-grid" class="top-countries-grid">
@@ -536,5 +533,16 @@
     <script src="js/audio.js"></script>
     <script src="js/map.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- Script Filtro -->
+    <script>
+        document.getElementById('continent-selector').addEventListener('change', function () {
+            const continent = this.value;
+
+            if (window.MapModule) {
+                window.MapModule.filterByContinent(continent);
+            }
+        });
+    </script>
 </body>
 </html>
