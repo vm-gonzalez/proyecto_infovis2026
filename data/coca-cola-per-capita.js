@@ -1,71 +1,124 @@
 /**
  * ====================================================================
- * DATASET: Consumo per cápita de bebidas de The Coca-Cola Company
- * Responsable: Sebastián Valencia (Data & Metrics)
+ * DATASET: Consumo Total de Coca-Cola por País
  * ====================================================================
- * Fuente: The Coca-Cola Company (©2012), "Per Capita Consumption of
- *         Company Beverage Products". Publicada junto al Annual Review 2011.
- *         Copia del documento original:
- *         https://wonderprofessor.com/121/Chap09/Chap09_CocaCola_2011_PerCapitaConsumption_Growth.pdf
+ * Fuente: World Population Review (2026), "Coca-Cola Consumption by Country"
+ * https://worldpopulationreview.com/country-rankings/coca-cola-consumption-by-country
  *
- * Unidad: porciones de 8 onzas líquidas EE.UU. (236,6 ml) de bebida
- *         terminada, por persona y por año. Incluye TODAS las marcas de la
- *         compañía (Coca-Cola, Sprite, Fanta, aguas, isotónicas, etc.),
- *         no solo Coca-Cola clásica.
+ * Unidad: Litros totales de bebida consumida al año en el país.
+ *         B L = Miles de millones de litros (Billions of Liters).
+ *         M L = Millones de litros (Millions of Liters).
  *
- * Cobertura: 35 países + promedio mundial. Los países del mapa que no
- *            aparecen aquí se muestran como "Sin datos".
- *            `null` = la fuente no reporta ese año (N/A).
+ * Cobertura: 96 países reportados con datos totales en la fuente.
  */
 
 const CocaColaDataset = {
     source: {
-        name: 'The Coca-Cola Company — Per Capita Consumption of Company Beverage Products',
-        year: 2012,
-        url: 'https://wonderprofessor.com/121/Chap09/Chap09_CocaCola_2011_PerCapitaConsumption_Growth.pdf',
-        unit: 'porciones de 8 oz / persona / año',
-        years: [1991, 2001, 2011]
+        name: 'World Population Review — Coca-Cola Consumption by Country',
+        year: 2026,
+        url: 'https://worldpopulationreview.com/country-rankings/coca-cola-consumption-by-country',
+        unit: 'Litros totales / año (B L / M L)',
+        metric: 'total_consumption'
     },
 
-    worldwide: { 1991: 44, 2001: 69, 2011: 92 },
-
-    // Código ISO (igual a los ids del SVG) -> porciones per cápita por año
+    // Total de países reportados: 96
     countries: {
-        mx: { 1991: 290, 2001: 460, 2011: 728 },
-        cl: { 1991: 157, 2001: 332, 2011: 460 },
-        us: { 1991: 292, 2001: 407, 2011: 403 },
-        pa: { 1991: 80,  2001: 155, 2011: 379 },
-        ar: { 1991: 135, 2001: 237, 2011: 345 },
-        be: { 1991: 201, 2001: 295, 2011: 340 },
-        au: { 1991: 224, 2001: 302, 2011: 309 },
-        es: { 1991: 156, 2001: 259, 2011: 287 },
-        ca: { 1991: 166, 2001: 240, 2011: 259 },
-        at: { 1991: 155, 2001: 189, 2011: 253 },
-        za: { 1991: 136, 2001: 176, 2011: 247 },
-        bo: { 1991: 55,  2001: 81,  2011: 244 },
-        br: { 1991: 102, 2001: 141, 2011: 230 },
-        gb: { 1991: 87,  2001: 188, 2011: 210 },
-        pe: { 1991: 47,  2001: 97,  2011: 208 },
-        de: { 1991: 181, 2001: 193, 2011: 190 },
-        sv: { 1991: 83,  2001: 189, 2011: 180 },
-        jp: { 1991: 122, 2001: 169, 2011: 179 },
-        tr: { 1991: 21,  2001: 67,  2011: 173 },
-        fr: { 1991: 52,  2001: 110, 2011: 149 },
-        it: { 1991: 90,  2001: 104, 2011: 137 },
-        ph: { 1991: 90,  2001: 154, 2011: 129 },
-        co: { 1991: 105, 2001: 87,  2011: 127 },
-        th: { 1991: 42,  2001: 60,  2011: 93 },
-        ma: { 1991: 35,  2001: 74,  2011: 88 },
-        kr: { 1991: 70,  2001: 72,  2011: 84 },
-        ru: { 1991: 1,   2001: 20,  2011: 73 },
-        eg: { 1991: 17,  2001: 31,  2011: 53 },
-        ke: { 1991: 35,  2001: 31,  2011: 40 },
-        cn: { 1991: 1,   2001: 9,   2011: 38 },
-        ng: { 1991: 23,  2001: 30,  2011: 27 },
-        pk: { 1991: 3,   2001: 5,   2011: 17 },
-        id: { 1991: 5,   2001: 18,  2011: 14 },
-        ml: { 1991: 1,   2001: 7,   2011: 12 },
-        in: { 1991: null, 2001: 4,  2011: 12 }
+        us: { rank: 1, name: 'Estados Unidos', consumption: '39,3 B L', litersBillions: 39.3, litersTotal: 39300000000 },
+        mx: { rank: 2, name: 'México', consumption: '19,5 B L', litersBillions: 19.5, litersTotal: 19500000000 },
+        cn: { rank: 3, name: 'China', consumption: '10,8 B L', litersBillions: 10.8, litersTotal: 10800000000 },
+        br: { rank: 4, name: 'Brasil', consumption: '8,7 B L', litersBillions: 8.7, litersTotal: 8700000000 },
+        jp: { rank: 5, name: 'Japón', consumption: '7,5 B L', litersBillions: 7.5, litersTotal: 7500000000 },
+        de: { rank: 6, name: 'Alemania', consumption: '6,8 B L', litersBillions: 6.8, litersTotal: 6800000000 },
+        ru: { rank: 7, name: 'Rusia', consumption: '6,4 B L', litersBillions: 6.4, litersTotal: 6400000000 },
+        in: { rank: 8, name: 'India', consumption: '5,9 B L', litersBillions: 5.9, litersTotal: 5900000000 },
+        id: { rank: 9, name: 'Indonesia', consumption: '5,3 B L', litersBillions: 5.3, litersTotal: 5300000000 },
+        gb: { rank: 10, name: 'Reino Unido', consumption: '4,9 B L', litersBillions: 4.9, litersTotal: 4900000000 },
+        fr: { rank: 11, name: 'Francia', consumption: '4,5 B L', litersBillions: 4.5, litersTotal: 4500000000 },
+        ca: { rank: 12, name: 'Canadá', consumption: '4,3 B L', litersBillions: 4.3, litersTotal: 4300000000 },
+        kr: { rank: 13, name: 'Corea del Sur', consumption: '4,1 B L', litersBillions: 4.1, litersTotal: 4100000000 },
+        it: { rank: 14, name: 'Italia', consumption: '3,8 B L', litersBillions: 3.8, litersTotal: 3800000000 },
+        ar: { rank: 15, name: 'Argentina', consumption: '3,7 B L', litersBillions: 3.7, litersTotal: 3700000000 },
+        es: { rank: 16, name: 'España', consumption: '3,4 B L', litersBillions: 3.4, litersTotal: 3400000000 },
+        sa: { rank: 17, name: 'Arabia Saudita', consumption: '3,2 B L', litersBillions: 3.2, litersTotal: 3200000000 },
+        au: { rank: 18, name: 'Australia', consumption: '3,1 B L', litersBillions: 3.1, litersTotal: 3100000000 },
+        th: { rank: 19, name: 'Tailandia', consumption: '3,0 B L', litersBillions: 3, litersTotal: 3000000000 },
+        tr: { rank: 20, name: 'Turquía', consumption: '2,9 B L', litersBillions: 2.9, litersTotal: 2900000000 },
+        ph: { rank: 21, name: 'Filipinas', consumption: '2,8 B L', litersBillions: 2.8, litersTotal: 2800000000 },
+        co: { rank: 22, name: 'Colombia', consumption: '2,7 B L', litersBillions: 2.7, litersTotal: 2700000000 },
+        eg: { rank: 23, name: 'Egipto', consumption: '2,6 B L', litersBillions: 2.6, litersTotal: 2600000000 },
+        za: { rank: 24, name: 'Sudáfrica', consumption: '2,5 B L', litersBillions: 2.5, litersTotal: 2500000000 },
+        pk: { rank: 25, name: 'Pakistán', consumption: '2,4 B L', litersBillions: 2.4, litersTotal: 2400000000 },
+        my: { rank: 26, name: 'Malasia', consumption: '2,3 B L', litersBillions: 2.3, litersTotal: 2300000000 },
+        cl: { rank: 27, name: 'Chile', consumption: '2,2 B L', litersBillions: 2.2, litersTotal: 2200000000 },
+        vn: { rank: 28, name: 'Vietnam', consumption: '2,1 B L', litersBillions: 2.1, litersTotal: 2100000000 },
+        pe: { rank: 29, name: 'Perú', consumption: '2,0 B L', litersBillions: 2, litersTotal: 2000000000 },
+        nl: { rank: 30, name: 'Países Bajos', consumption: '1,9 B L', litersBillions: 1.9, litersTotal: 1900000000 },
+        be: { rank: 31, name: 'Bélgica', consumption: '1,8 B L', litersBillions: 1.8, litersTotal: 1800000000 },
+        ae: { rank: 32, name: 'Emiratos Árabes Unidos', consumption: '1,7 B L', litersBillions: 1.7, litersTotal: 1700000000 },
+        sg: { rank: 33, name: 'Singapur', consumption: '1,6 B L', litersBillions: 1.6, litersTotal: 1600000000 },
+        iq: { rank: 34, name: 'Irak', consumption: '1,5 B L', litersBillions: 1.5, litersTotal: 1500000000 },
+        ng: { rank: 35, name: 'Nigeria', consumption: '1,4 B L', litersBillions: 1.4, litersTotal: 1400000000 },
+        ve: { rank: 36, name: 'Venezuela', consumption: '1,3 B L', litersBillions: 1.3, litersTotal: 1300000000 },
+        nz: { rank: 37, name: 'Nueva Zelanda', consumption: '1,2 B L', litersBillions: 1.2, litersTotal: 1200000000 },
+        kw: { rank: 38, name: 'Kuwait', consumption: '1,1 B L', litersBillions: 1.1, litersTotal: 1100000000 },
+        qa: { rank: 39, name: 'Catar', consumption: '1,0 B L', litersBillions: 1, litersTotal: 1000000000 },
+        ch: { rank: 40, name: 'Suiza', consumption: '900 M L', litersBillions: 0.9, litersTotal: 900000000 },
+        pt: { rank: 41, name: 'Portugal', consumption: '800 M L', litersBillions: 0.8, litersTotal: 800000000 },
+        hk: { rank: 42, name: 'Hong Kong', consumption: '700 M L', litersBillions: 0.7, litersTotal: 700000000 },
+        at: { rank: 43, name: 'Austria', consumption: '600 M L', litersBillions: 0.6, litersTotal: 600000000 },
+        il: { rank: 44, name: 'Israel', consumption: '500 M L', litersBillions: 0.5, litersTotal: 500000000 },
+        se: { rank: 45, name: 'Suecia', consumption: '400 M L', litersBillions: 0.4, litersTotal: 400000000 },
+        lb: { rank: 46, name: 'Líbano', consumption: '300 M L', litersBillions: 0.3, litersTotal: 300000000 },
+        jo: { rank: 47, name: 'Jordania', consumption: '200 M L', litersBillions: 0.2, litersTotal: 200000000 },
+        bd: { rank: 48, name: 'Bangladés', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        et: { rank: 49, name: 'Etiopía', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ir: { rank: 50, name: 'Irán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ke: { rank: 51, name: 'Kenia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        sd: { rank: 52, name: 'Sudán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        af: { rank: 53, name: 'Afganistán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ye: { rank: 54, name: 'Yemen', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ua: { rank: 55, name: 'Ucrania', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        pl: { rank: 56, name: 'Polonia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        uz: { rank: 57, name: 'Uzbekistán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        np: { rank: 58, name: 'Nepal', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        lk: { rank: 59, name: 'Sri Lanka', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        kz: { rank: 60, name: 'Kazajistán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        so: { rank: 61, name: 'Somalia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ro: { rank: 62, name: 'Rumania', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ss: { rank: 63, name: 'Sudán del Sur', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        tj: { rank: 64, name: 'Tayikistán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        cz: { rank: 65, name: 'Chequia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        az: { rank: 66, name: 'Azerbaiyán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        gr: { rank: 67, name: 'Grecia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        hu: { rank: 68, name: 'Hungría', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        by: { rank: 69, name: 'Bielorrusia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        tm: { rank: 70, name: 'Turkmenistán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        kg: { rank: 71, name: 'Kirguistán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        bg: { rank: 72, name: 'Bulgaria', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        rs: { rank: 73, name: 'Serbia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        dk: { rank: 74, name: 'Dinamarca', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        om: { rank: 75, name: 'Omán', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        no: { rank: 76, name: 'Noruega', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        fi: { rank: 77, name: 'Finlandia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        sk: { rank: 78, name: 'Eslovaquia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ie: { rank: 79, name: 'Irlanda', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        hr: { rank: 80, name: 'Croacia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ge: { rank: 81, name: 'Georgia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        er: { rank: 82, name: 'Eritrea', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        mn: { rank: 83, name: 'Mongolia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ba: { rank: 84, name: 'Bosnia y Herzegovina', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        md: { rank: 85, name: 'Moldavia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        am: { rank: 86, name: 'Armenia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        lt: { rank: 87, name: 'Lituania', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        al: { rank: 88, name: 'Albania', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        si: { rank: 89, name: 'Eslovenia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        lv: { rank: 90, name: 'Letonia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        mk: { rank: 91, name: 'Macedonia del Norte', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        ee: { rank: 92, name: 'Estonia', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        dj: { rank: 93, name: 'Yibuti', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        bt: { rank: 94, name: 'Bután', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        me: { rank: 95, name: 'Montenegro', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
+        mv: { rank: 96, name: 'Maldivas', consumption: '100 M L', litersBillions: 0.1, litersTotal: 100000000 },
     }
 };
 
