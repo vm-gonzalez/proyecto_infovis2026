@@ -33,20 +33,22 @@ function renderTopRanking(continent = 'Todos') {
     if (!gridContainer) return;
 
     const isAll = (continent === 'Todos');
-    const top = window.CocaColaData ? window.CocaColaData.getTopCountries(6, continent) : [];
+    // Ranking completo de la categoría (el contenedor muestra 6 a la vez y hace scroll si hay más)
+    const top = window.CocaColaData ? window.CocaColaData.getTopCountries(Infinity, continent) : [];
     const count = top.length;
+    const scrollHint = count > 6 ? ' &bull; desliza para ver el ranking completo' : '';
 
     // Actualizar encabezados y subtítulos
     if (titleContainer) {
         titleContainer.innerHTML = isAll
-            ? `🏆 Primeros ${count} Países con Mayor Consumo Mundial`
-            : `🏆 Primeros ${count} Países con Mayor Consumo &bull; ${continent}`;
+            ? `🏆 Ranking de Países con Mayor Consumo Mundial`
+            : `🏆 Ranking de Países con Mayor Consumo &bull; ${continent}`;
     }
 
     if (subtitleContainer) {
         subtitleContainer.innerHTML = isAll
-            ? '<span>Los 6 países con mayor volumen total de consumo de Coca-Cola a nivel mundial</span>'
-            : `<span>Los países con mayor volumen total de consumo de Coca-Cola en <strong>${continent}</strong></span>`;
+            ? `<span>Los ${count} países con datos ordenados por volumen total de consumo de Coca-Cola a nivel mundial${scrollHint}</span>`
+            : `<span>Los ${count} países de <strong>${continent}</strong> ordenados por volumen total de consumo de Coca-Cola${scrollHint}</span>`;
     }
 
     if (indicatorContainer) {
@@ -112,6 +114,9 @@ function renderTopRanking(continent = 'Todos') {
             </div>
         `;
     }).join('');
+
+    // Al cambiar de continente, volver al inicio del ranking
+    gridContainer.scrollTo({ left: 0, behavior: 'instant' });
 
     // Coordinación interactiva: hover y clic en cada tarjeta
     const cards = gridContainer.querySelectorAll('.top-country-card[data-country-id]');
