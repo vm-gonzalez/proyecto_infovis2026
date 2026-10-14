@@ -122,6 +122,14 @@ const MapModule = {
         const matchingCard = document.querySelector(`.top-country-card[data-country-id="${countryId}"]`);
         if (matchingCard) {
             matchingCard.classList.add('is-map-hovered');
+
+            // Desplazar el ranking horizontalmente si la tarjeta quedó fuera de vista
+            const grid = matchingCard.parentElement;
+            const cardLeft = matchingCard.getBoundingClientRect().left - grid.getBoundingClientRect().left + grid.scrollLeft;
+            const cardRight = cardLeft + matchingCard.offsetWidth;
+            if (cardLeft < grid.scrollLeft || cardRight > grid.scrollLeft + grid.clientWidth) {
+                grid.scrollTo({ left: cardLeft - (grid.clientWidth - matchingCard.offsetWidth) / 2 });
+            }
         }
     },
 

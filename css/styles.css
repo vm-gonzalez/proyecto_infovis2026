@@ -460,12 +460,44 @@ body {
     gap: 6px;
 }
 
-/* Grilla de los 6 Países */
+/* Ranking completo: fila con scroll horizontal (6 tarjetas visibles a la vez) */
 .top-countries-grid {
+    --visible-cards: 6;
+    --cards-gap: 14px;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 14px;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - (var(--visible-cards) - 1) * var(--cards-gap)) / var(--visible-cards));
+    gap: var(--cards-gap);
     width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-behavior: smooth;
+    /* Espacio para la elevación y sombra de las tarjetas al hacer hover */
+    padding: 8px 2px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--coca-red) transparent;
+}
+
+.top-countries-grid > .top-country-card {
+    scroll-snap-align: start;
+}
+
+.top-countries-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.top-countries-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.top-countries-grid::-webkit-scrollbar-thumb {
+    background: var(--coca-red);
+    border-radius: 8px;
+}
+
+.top-countries-grid:has(.no-top-countries) {
+    display: block;
 }
 
 .no-top-countries {
@@ -762,7 +794,7 @@ body {
 /* Responsividad */
 @media (max-width: 1200px) {
     .top-countries-grid {
-        grid-template-columns: repeat(3, 1fr);
+        --visible-cards: 3;
     }
     .map-view-wrapper {
         height: 52vh;
@@ -782,7 +814,7 @@ body {
         font-size: 1.35rem;
     }
     .top-countries-grid {
-        grid-template-columns: repeat(2, 1fr);
+        --visible-cards: 2;
     }
     .map-view-wrapper {
         height: 44vh;
@@ -802,7 +834,7 @@ body {
 
 @media (max-width: 480px) {
     .top-countries-grid {
-        grid-template-columns: 1fr;
+        --visible-cards: 1.25;
     }
     .top-section-header {
         flex-direction: column;
