@@ -164,9 +164,11 @@ const MapModule = {
             </div>
         `;
 
+        const flagContent = data.flag || `<svg class="flag-placeholder-svg" viewBox="0 0 24 16" width="24" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 1v14M2 2h14l-2 4 2 4H2" stroke="rgba(255,255,255,0.4)" fill="rgba(255,255,255,0.1)"/></svg>`;
+
         this.tooltipElement.innerHTML = `
             <div class="tooltip-header">
-                <span class="tooltip-flag">${data.flag || '🏳️'}</span>
+                <span class="tooltip-flag">${flagContent}</span>
                 <div class="tooltip-titles">
                     <h3 class="tooltip-country-name">${data.name}</h3>
                     <span class="tooltip-continent">${data.continent}</span>
