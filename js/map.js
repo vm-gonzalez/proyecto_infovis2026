@@ -37,6 +37,82 @@ const MapModule = {
 
         // 4. Configurar interactividad de la leyenda
         this.setupLegendControls();
+
+        // 5. Configurar selector de métricas (Per Cápita vs Total)
+        this.setupMetricControls();
+
+        // 6. Sincronizar textos iniciales de la leyenda según la métrica activa
+        this.updateLegendUI();
+    },
+
+    setupMetricControls: function () {
+        const metricButtons = document.querySelectorAll('.metric-toggle-btn');
+        metricButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const metric = btn.getAttribute('data-metric');
+                if (metric) {
+                    this.setMetric(metric);
+                }
+            });
+        });
+    },
+
+    setMetric: function (metric) {
+        if (!window.CocaColaData) return;
+        if (window.CocaColaData.currentMetric === metric) return;
+
+        window.CocaColaData.setMetric(metric);
+
+        // Actualizar botones de la barra superior
+        document.querySelectorAll('.metric-toggle-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-metric') === metric);
+        });
+
+        // Actualizar todos los paths del mapa SVG con su nuevo nivel y color
+        const paths = this.svgElement.querySelectorAll('path.country-path');
+        paths.forEach(path => {
+            const countryId = path.getAttribute('data-country-id');
+            const countryData = window.CocaColaData.getCountry(countryId);
+            const level = countryData && countryData.level ? countryData.level : 'sin_datos';
+            path.setAttribute('data-level', level);
+            path.style.fill = window.CocaColaData.getColorByLevel(countryData?.level);
+        });
+
+        // Actualizar textos y rangos de la leyenda
+        this.updateLegendUI();
+
+        // Actualizar filtros aplicados (manteniendo continente o tier seleccionado)
+        this.applyFilters();
+
+        // Actualizar banner y ranking inferior
+        this.filterByContinent(this.activeContinent);
+    },
+
+    updateLegendUI: function () {
+        if (!window.CocaColaData) return;
+        const isPerCapita = (window.CocaColaData.currentMetric === 'per_capita');
+        const titleEl = document.getElementById('legend-metric-title');
+        const hintEl = document.getElementById('legend-metric-hint');
+
+        if (titleEl) {
+            titleEl.textContent = isPerCapita ? 'Consumo Per Cápita' : 'Consumo Total Anual';
+        }
+        if (hintEl) {
+            hintEl.textContent = isPerCapita ? 'Litros / habitante / año' : 'Litros anuales consumidos';
+        }
+
+        const tiers = window.CocaColaData.getTiers();
+        const legendItems = document.querySelectorAll('.legend-tier[data-tier]');
+        legendItems.forEach(item => {
+            const tierId = item.getAttribute('data-tier');
+            if (tierId === 'sin_datos') return;
+            const tierConfig = tiers[tierId];
+            if (tierConfig) {
+                const rangeEl = item.querySelector('.tier-range');
+                if (rangeEl) rangeEl.textContent = `(${tierConfig.range})`;
+                item.setAttribute('title', `${tierConfig.label} (${tierConfig.range})`);
+            }
+        });
     },
 
     setupCountryPaths: function () {
@@ -65,47 +141,66 @@ const MapModule = {
     },
 
     setupEventListeners: function () {
-        const paths = this.svgElement.querySelectorAll('path.country-path');
+        if (!this.svgElement) return;
 
-        paths.forEach(path => {
-            path.addEventListener('mouseenter', (e) => {
-                const countryId = path.getAttribute('data-country-id');
-                if (!countryId || countryId === 'desconocido') return;
+        // Delegación de eventos en el SVG contenedor: evita adjuntar cientos de listeners individuales
+        this.svgElement.addEventListener('mouseover', (e) => {
+            const path = e.target.closest('path.country-path');
+            if (!path) return;
 
-                if (this.currentHoveredCountryId === countryId) return;
+            const countryId = path.getAttribute('data-country-id');
+            if (!countryId || countryId === 'desconocido') return;
 
-                this.clearAllHighlights();
-                this.currentHoveredCountryId = countryId;
+            if (this.currentHoveredCountryId === countryId) return;
 
-                const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
-                if (!countryData) return;
+            this.clearAllHighlights();
+            this.currentHoveredCountryId = countryId;
 
-                // 1. Iluminar país en hover
-                this.highlightCountry(countryId);
+            const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
+            if (!countryData) return;
 
-                // 2. Mostrar Tooltip optimizado
-                this.showTooltip(countryData);
-                this.updateTooltipPosition(e);
+            // 1. Iluminar país en hover
+            this.highlightCountry(countryId);
 
-                // 3. Invocar al módulo de audio de Martín (recibirá el país)
-                if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
-                    window.SoundEngine.playBurpForCountry(countryData);
-                }
-            });
+            // 2. Mostrar Tooltip optimizado
+            this.showTooltip(countryData);
+            this.updateTooltipPosition(e);
 
-            path.addEventListener('mousemove', (e) => {
-                this.updateTooltipPosition(e);
-            });
-
-            path.addEventListener('mouseleave', () => {
-                const countryId = path.getAttribute('data-country-id');
-                this.unhighlightCountry(countryId);
-                this.hideTooltip();
-                this.currentHoveredCountryId = null;
-            });
+            // 3. Invocar al módulo de audio de Martín (recibirá el país)
+            if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
+                window.SoundEngine.playBurpForCountry(countryData);
+            }
         });
 
-        // Limpieza al salir del mapa completo
+        this.svgElement.addEventListener('mousemove', (e) => {
+            if (this.currentHoveredCountryId) {
+                this.updateTooltipPosition(e);
+            }
+        }, { passive: true });
+
+        this.svgElement.addEventListener('mouseout', (e) => {
+            const path = e.target.closest('path.country-path');
+            if (!path) return;
+
+            // Si el cursor se movió a otro elemento del mismo país (isla o polígono contiguo), no limpiar
+            const related = e.relatedTarget ? e.relatedTarget.closest('path.country-path') : null;
+            const relatedCountryId = related ? related.getAttribute('data-country-id') : null;
+
+            if (relatedCountryId === this.currentHoveredCountryId) {
+                return;
+            }
+
+            const countryId = path.getAttribute('data-country-id');
+            this.unhighlightCountry(countryId);
+
+            // Si sale al mar o fuera del mapa (sin otro país de destino inmediato)
+            if (!relatedCountryId) {
+                this.hideTooltip();
+                this.currentHoveredCountryId = null;
+            }
+        });
+
+        // Limpieza de seguridad al salir del mapa completo
         this.svgElement.addEventListener('mouseleave', () => {
             this.clearAllHighlights();
             this.hideTooltip();
@@ -131,22 +226,22 @@ const MapModule = {
     },
 
     /**
-     * Muestra el Tooltip informativo de forma minimalista y concisa con el consumo total.
+     * Muestra el Tooltip informativo contrastando consumo per cápita y volumen total.
      */
     showTooltip: function (data) {
         if (!this.tooltipElement) return;
 
+        const isPerCapita = window.CocaColaData && window.CocaColaData.currentMetric === 'per_capita';
         const tier = window.CocaColaData ? window.CocaColaData.getTierConfig(data.level) : {};
-        const consumption = data.consumption || 'Sin datos';
-        const rankLabel = data.hasData ? `#${data.rank} a nivel mundial` : 'Sin ranking';
 
         const tierBadge = data.hasData ? `
             <div class="tooltip-tier-badge" style="background: ${tier.color}28; border: 1px solid ${tier.color}; color: #FFFFFF;">
-                ${tier.label} &bull; ${tier.range}
+                <span class="tooltip-tier-dot" style="background: ${tier.color};"></span>
+                <span>${tier.label} &bull; ${tier.range}</span>
             </div>
         ` : `
             <div class="tooltip-tier-badge" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted);">
-                Sin datos en la fuente
+                Sin datos reportados
             </div>
         `;
 
@@ -157,20 +252,20 @@ const MapModule = {
                 <span class="tooltip-flag">${flagContent}</span>
                 <div class="tooltip-titles">
                     <h3 class="tooltip-country-name">${data.name}</h3>
-                    <span class="tooltip-continent">${data.continent}</span>
+                    <span class="tooltip-continent">${data.continent}${data.populationFormatted ? ` &bull; ${data.populationFormatted}` : ''}</span>
                 </div>
             </div>
             
             ${tierBadge}
 
             <div class="tooltip-metrics">
-                <div class="metric-item">
-                    <span class="metric-value">${consumption}</span>
-                    <span class="metric-label">Consumo Total Anual</span>
+                <div class="metric-item ${isPerCapita ? 'metric-item-active' : ''}">
+                    <span class="metric-value">${data.consumptionPerCapita || 'Sin datos'}</span>
+                    <span class="metric-label">Per Cápita ${data.rankPerCapita ? '(#' + data.rankPerCapita + ')' : ''}</span>
                 </div>
-                <div class="metric-item">
-                    <span class="metric-value">${data.hasData ? '#' + data.rank : '--'}</span>
-                    <span class="metric-label">Ranking Global</span>
+                <div class="metric-item ${!isPerCapita ? 'metric-item-active' : ''}">
+                    <span class="metric-value">${data.consumptionTotal || 'Sin datos'}</span>
+                    <span class="metric-label">Total Anual ${data.rankTotal ? '(#' + data.rankTotal + ')' : ''}</span>
                 </div>
             </div>
 
@@ -187,11 +282,16 @@ const MapModule = {
     updateTooltipPosition: function (e) {
         if (!this.tooltipElement) return;
 
-        if (this._rafTooltip) cancelAnimationFrame(this._rafTooltip);
+        this._mouseX = e.clientX;
+        this._mouseY = e.clientY;
+
+        if (this._rafTooltip) return;
+
         this._rafTooltip = requestAnimationFrame(() => {
+            this._rafTooltip = null;
             const offset = 14;
-            let x = e.clientX + offset;
-            let y = e.clientY + offset;
+            let x = this._mouseX + offset;
+            let y = this._mouseY + offset;
 
             const tooltipWidth = 280;
             const tooltipHeight = 160;
@@ -199,11 +299,11 @@ const MapModule = {
             const winHeight = window.innerHeight;
 
             if (x + tooltipWidth > winWidth - 12) {
-                x = e.clientX - tooltipWidth - offset;
+                x = this._mouseX - tooltipWidth - offset;
             }
 
             if (y + tooltipHeight > winHeight - 12) {
-                y = e.clientY - tooltipHeight - offset;
+                y = this._mouseY - tooltipHeight - offset;
             }
 
             this.tooltipElement.style.transform = `translate3d(${Math.max(8, x)}px, ${Math.max(8, y)}px, 0)`;
@@ -211,6 +311,10 @@ const MapModule = {
     },
 
     hideTooltip: function () {
+        if (this._rafTooltip) {
+            cancelAnimationFrame(this._rafTooltip);
+            this._rafTooltip = null;
+        }
         if (this.tooltipElement) {
             this.tooltipElement.classList.remove('visible');
         }
@@ -259,18 +363,20 @@ const MapModule = {
 
         const banner = document.getElementById('continent-banner-info');
         if (banner) {
+            const isPerCapita = window.CocaColaData && window.CocaColaData.currentMetric === 'per_capita';
+
             if (continent === 'Todos') {
-                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas y reproducir audio</span>`;
+                banner.innerHTML = `<span>Descubre qué países lideran el consumo &bull; Métrica activa: <strong>${isPerCapita ? 'Por Habitante (Per Cápita)' : 'Volumen Total Anual'}</strong> &bull; Pasa el cursor para ver detalles</span>`;
             } else {
                 const stats = window.CocaColaData ? window.CocaColaData.getContinentStats(continent) : null;
                 const statsText = stats && stats.count > 0
-                    ? ` &bull; <strong>${stats.count}</strong> países reportados &bull; Consumo regional: <strong>${stats.totalFormatted}</strong> &bull; Mayor consumidor: <strong>${stats.topCountry?.name}</strong> (${stats.topCountry?.consumption})`
+                    ? ` &bull; <strong>${stats.count}</strong> países &bull; ${isPerCapita ? 'Promedio: <strong>' + stats.averagePerCapita + '</strong>' : 'Volumen total: <strong>' + stats.totalFormatted + '</strong>'} &bull; Mayor consumidor: <strong>${stats.topCountry?.name}</strong> (${stats.topCountry?.consumption})`
                     : ' &bull; Sin países reportados en la fuente';
-                banner.innerHTML = `<span>Continente: <strong>${continent}</strong>${statsText}</span>`;
+                banner.innerHTML = `<span>Países que más consumen en <strong>${continent}</strong> (${isPerCapita ? 'Per Cápita' : 'Volumen Total'})${statsText}</span>`;
             }
         }
 
-        // Coordinación analítica: Actualizar Top 6 del continente seleccionado
+        // Coordinación analítica: Actualizar Ranking del continente seleccionado
         if (typeof window.renderTopRanking === 'function') {
             window.renderTopRanking(continent);
         }

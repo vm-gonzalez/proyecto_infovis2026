@@ -33,6 +33,10 @@ function renderTopRanking(continent = 'Todos') {
     if (!gridContainer) return;
 
     const isAll = (continent === 'Todos');
+    const metric = window.CocaColaData ? window.CocaColaData.currentMetric : 'per_capita';
+    const isPerCapita = (metric === 'per_capita');
+    const metricTitleName = isPerCapita ? 'Mayor Consumo Per Cápita' : 'Mayor Volumen Total';
+
     // Carga de todos los países disponibles para la zona para permitir scroll horizontal completo
     const top = window.CocaColaData ? window.CocaColaData.getTopCountries(Infinity, continent) : [];
     const count = top.length;
@@ -40,17 +44,21 @@ function renderTopRanking(continent = 'Todos') {
 
     const trophySvg = `<svg class="trophy-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 5h16v4a6 6 0 0 1-12 0V5z"/><path d="M12 15v5"/><path d="M8 20h8"/></svg>`;
 
-    // Actualizar encabezados y subtítulos con SVG sin emojis
+    // Actualizar encabezados y subtítulos
     if (titleContainer) {
         titleContainer.innerHTML = isAll
-            ? `${trophySvg} <span>Ranking de Países con Mayor Consumo Mundial (${count})</span>`
-            : `${trophySvg} <span>Ranking de Países con Mayor Consumo &bull; ${continent} (${count})</span>`;
+            ? `${trophySvg} <span>Países que Más Consumen Coca-Cola &bull; ${isPerCapita ? 'Por Habitante' : 'Volumen Total'} (${count})</span>`
+            : `${trophySvg} <span>Países que Más Consumen en ${continent} &bull; ${isPerCapita ? 'Por Habitante' : 'Volumen Total'} (${count})</span>`;
     }
 
     if (subtitleContainer) {
-        subtitleContainer.innerHTML = isAll
-            ? `<span>Los ${count} países con datos ordenados por volumen total de consumo de Coca-Cola a nivel mundial${scrollHint}</span>`
-            : `<span>Los ${count} países de <strong>${continent}</strong> ordenados por volumen total de consumo de Coca-Cola${scrollHint}</span>`;
+        subtitleContainer.innerHTML = isPerCapita
+            ? (isAll
+                ? `<span>Ranking de las naciones que lideran el consumo de Coca-Cola por persona al año (Litros por habitante)${scrollHint}</span>`
+                : `<span>Ranking de los países de <strong>${continent}</strong> que más consumen Coca-Cola por persona al año${scrollHint}</span>`)
+            : (isAll
+                ? `<span>Ranking de las naciones con mayor volumen total de consumo de Coca-Cola al año en litros${scrollHint}</span>`
+                : `<span>Ranking de los países de <strong>${continent}</strong> con mayor volumen total de Coca-Cola al año${scrollHint}</span>`);
     }
 
     if (indicatorContainer) {
@@ -79,9 +87,11 @@ function renderTopRanking(continent = 'Todos') {
         const isRegional = !isAll;
         const displayRank = isRegional ? `#${country.regionalRank}` : `#${country.rank}`;
         const medalSvg = podiumMedals[country.regionalRank] || '';
-        const globalRankText = isRegional ? `Global: #${country.rank}` : `Puesto #${country.rank}`;
+        const globalRankText = isPerCapita
+            ? (isRegional ? `Global: #${country.rankPerCapita} (Tot: #${country.rankTotal})` : `Puesto #${country.rankPerCapita} (Tot: #${country.rankTotal})`)
+            : (isRegional ? `Global: #${country.rankTotal} (Per Cáp: #${country.rankPerCapita})` : `Puesto #${country.rankTotal} (Per Cáp: #${country.rankPerCapita})`);
+        const consumptionLabel = isPerCapita ? 'Consumo por Persona' : 'Consumo Total Anual';
         const tierConfig = window.CocaColaData ? window.CocaColaData.getTierConfig(country.level) : {};
-        // Etiqueta concisa para evitar que empuje y recorte el número de puesto
         const tierShortLabel = tierConfig.label ? tierConfig.label.replace('Consumo ', '') : 'Sin datos';
 
         return `
@@ -96,14 +106,14 @@ function renderTopRanking(continent = 'Todos') {
 
                 <div class="card-center">
                     <div class="card-flag-box">
-                        <img class="card-flag-img" src="https://flagcdn.com/w80/${country.id}.png" alt="Bandera de ${country.name}" loading="lazy" onerror="this.onerror=null;this.src='${flagSvgFallback}'">
+                        <img class="card-flag-img" src="https://flagcdn.com/w80/${country.id}.png" alt="Bandera de ${country.name}" loading="lazy" decoding="async" width="28" height="18" onerror="this.onerror=null;this.src='${flagSvgFallback}'">
                     </div>
                     <h3 class="card-country-name" title="${country.name}">${country.name}</h3>
                 </div>
 
                 <div class="card-consumption-block">
                     <span class="card-consumption-val">${country.consumption}</span>
-                    <span class="card-consumption-lbl">Consumo Total Anual</span>
+                    <span class="card-consumption-lbl">${consumptionLabel}</span>
                 </div>
 
                 <div class="card-bottom-row">
@@ -111,39 +121,50 @@ function renderTopRanking(continent = 'Todos') {
                         <span class="tier-dot" style="background-color: ${tierConfig.color};"></span>
                         ${tierShortLabel}
                     </span>
-                    <span class="card-global-ref">${globalRankText}</span>
+                    <span class="card-global-ref" title="${globalRankText}">${globalRankText}</span>
                 </div>
             </div>
         `;
     }).join('');
 
     // Al cambiar de continente o recargar, situar el scroll del ranking al inicio
+    gridContainer.scrollLeft = 0;
     gridContainer.scrollTo({ left: 0, behavior: 'instant' });
 
-    // Coordinación interactiva: hover y clic en cada tarjeta
-    const cards = gridContainer.querySelectorAll('.top-country-card[data-country-id]');
-    cards.forEach(card => {
-        const countryId = card.getAttribute('data-country-id');
+    // Coordinación interactiva delegada: hover y clic en las tarjetas (registrado una sola vez)
+    if (!gridContainer._hasDelegatedEvents) {
+        gridContainer._hasDelegatedEvents = true;
 
-        card.addEventListener('mouseenter', () => {
+        gridContainer.addEventListener('mouseover', (e) => {
+            const card = e.target.closest('.top-country-card[data-country-id]');
+            if (!card) return;
+            const countryId = card.getAttribute('data-country-id');
             if (window.MapModule && countryId) {
                 window.MapModule.highlightCountry(countryId);
             }
         });
 
-        card.addEventListener('mouseleave', () => {
+        gridContainer.addEventListener('mouseout', (e) => {
+            const card = e.target.closest('.top-country-card[data-country-id]');
+            if (!card) return;
+            const relatedCard = e.relatedTarget ? e.relatedTarget.closest('.top-country-card[data-country-id]') : null;
+            if (relatedCard === card) return; // Sigue dentro de la misma tarjeta
+            const countryId = card.getAttribute('data-country-id');
             if (window.MapModule && countryId) {
                 window.MapModule.unhighlightCountry(countryId);
             }
         });
 
-        card.addEventListener('click', () => {
+        gridContainer.addEventListener('click', (e) => {
+            const card = e.target.closest('.top-country-card[data-country-id]');
+            if (!card) return;
+            const countryId = card.getAttribute('data-country-id');
             const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
             if (countryData && window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
                 window.SoundEngine.playBurpForCountry(countryData);
             }
         });
-    });
+    }
 }
 
 window.renderTopRanking = renderTopRanking;
