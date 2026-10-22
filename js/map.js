@@ -141,47 +141,66 @@ const MapModule = {
     },
 
     setupEventListeners: function () {
-        const paths = this.svgElement.querySelectorAll('path.country-path');
+        if (!this.svgElement) return;
 
-        paths.forEach(path => {
-            path.addEventListener('mouseenter', (e) => {
-                const countryId = path.getAttribute('data-country-id');
-                if (!countryId || countryId === 'desconocido') return;
+        // Delegación de eventos en el SVG contenedor: evita adjuntar cientos de listeners individuales
+        this.svgElement.addEventListener('mouseover', (e) => {
+            const path = e.target.closest('path.country-path');
+            if (!path) return;
 
-                if (this.currentHoveredCountryId === countryId) return;
+            const countryId = path.getAttribute('data-country-id');
+            if (!countryId || countryId === 'desconocido') return;
 
-                this.clearAllHighlights();
-                this.currentHoveredCountryId = countryId;
+            if (this.currentHoveredCountryId === countryId) return;
 
-                const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
-                if (!countryData) return;
+            this.clearAllHighlights();
+            this.currentHoveredCountryId = countryId;
 
-                // 1. Iluminar país en hover
-                this.highlightCountry(countryId);
+            const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
+            if (!countryData) return;
 
-                // 2. Mostrar Tooltip optimizado
-                this.showTooltip(countryData);
-                this.updateTooltipPosition(e);
+            // 1. Iluminar país en hover
+            this.highlightCountry(countryId);
 
-                // 3. Invocar al módulo de audio de Martín (recibirá el país)
-                if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
-                    window.SoundEngine.playBurpForCountry(countryData);
-                }
-            });
+            // 2. Mostrar Tooltip optimizado
+            this.showTooltip(countryData);
+            this.updateTooltipPosition(e);
 
-            path.addEventListener('mousemove', (e) => {
-                this.updateTooltipPosition(e);
-            });
-
-            path.addEventListener('mouseleave', () => {
-                const countryId = path.getAttribute('data-country-id');
-                this.unhighlightCountry(countryId);
-                this.hideTooltip();
-                this.currentHoveredCountryId = null;
-            });
+            // 3. Invocar al módulo de audio de Martín (recibirá el país)
+            if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
+                window.SoundEngine.playBurpForCountry(countryData);
+            }
         });
 
-        // Limpieza al salir del mapa completo
+        this.svgElement.addEventListener('mousemove', (e) => {
+            if (this.currentHoveredCountryId) {
+                this.updateTooltipPosition(e);
+            }
+        }, { passive: true });
+
+        this.svgElement.addEventListener('mouseout', (e) => {
+            const path = e.target.closest('path.country-path');
+            if (!path) return;
+
+            // Si el cursor se movió a otro elemento del mismo país (isla o polígono contiguo), no limpiar
+            const related = e.relatedTarget ? e.relatedTarget.closest('path.country-path') : null;
+            const relatedCountryId = related ? related.getAttribute('data-country-id') : null;
+
+            if (relatedCountryId === this.currentHoveredCountryId) {
+                return;
+            }
+
+            const countryId = path.getAttribute('data-country-id');
+            this.unhighlightCountry(countryId);
+
+            // Si sale al mar o fuera del mapa (sin otro país de destino inmediato)
+            if (!relatedCountryId) {
+                this.hideTooltip();
+                this.currentHoveredCountryId = null;
+            }
+        });
+
+        // Limpieza de seguridad al salir del mapa completo
         this.svgElement.addEventListener('mouseleave', () => {
             this.clearAllHighlights();
             this.hideTooltip();
@@ -263,11 +282,16 @@ const MapModule = {
     updateTooltipPosition: function (e) {
         if (!this.tooltipElement) return;
 
-        if (this._rafTooltip) cancelAnimationFrame(this._rafTooltip);
+        this._mouseX = e.clientX;
+        this._mouseY = e.clientY;
+
+        if (this._rafTooltip) return;
+
         this._rafTooltip = requestAnimationFrame(() => {
+            this._rafTooltip = null;
             const offset = 14;
-            let x = e.clientX + offset;
-            let y = e.clientY + offset;
+            let x = this._mouseX + offset;
+            let y = this._mouseY + offset;
 
             const tooltipWidth = 280;
             const tooltipHeight = 160;
@@ -275,11 +299,11 @@ const MapModule = {
             const winHeight = window.innerHeight;
 
             if (x + tooltipWidth > winWidth - 12) {
-                x = e.clientX - tooltipWidth - offset;
+                x = this._mouseX - tooltipWidth - offset;
             }
 
             if (y + tooltipHeight > winHeight - 12) {
-                y = e.clientY - tooltipHeight - offset;
+                y = this._mouseY - tooltipHeight - offset;
             }
 
             this.tooltipElement.style.transform = `translate3d(${Math.max(8, x)}px, ${Math.max(8, y)}px, 0)`;
@@ -287,6 +311,10 @@ const MapModule = {
     },
 
     hideTooltip: function () {
+        if (this._rafTooltip) {
+            cancelAnimationFrame(this._rafTooltip);
+            this._rafTooltip = null;
+        }
         if (this.tooltipElement) {
             this.tooltipElement.classList.remove('visible');
         }

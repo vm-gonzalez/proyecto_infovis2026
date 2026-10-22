@@ -106,7 +106,7 @@ function renderTopRanking(continent = 'Todos') {
 
                 <div class="card-center">
                     <div class="card-flag-box">
-                        <img class="card-flag-img" src="https://flagcdn.com/w80/${country.id}.png" alt="Bandera de ${country.name}" loading="lazy" onerror="this.onerror=null;this.src='${flagSvgFallback}'">
+                        <img class="card-flag-img" src="https://flagcdn.com/w80/${country.id}.png" alt="Bandera de ${country.name}" loading="lazy" decoding="async" width="28" height="18" onerror="this.onerror=null;this.src='${flagSvgFallback}'">
                     </div>
                     <h3 class="card-country-name" title="${country.name}">${country.name}</h3>
                 </div>
@@ -131,30 +131,40 @@ function renderTopRanking(continent = 'Todos') {
     gridContainer.scrollLeft = 0;
     gridContainer.scrollTo({ left: 0, behavior: 'instant' });
 
-    // Coordinación interactiva: hover y clic en cada tarjeta
-    const cards = gridContainer.querySelectorAll('.top-country-card[data-country-id]');
-    cards.forEach(card => {
-        const countryId = card.getAttribute('data-country-id');
+    // Coordinación interactiva delegada: hover y clic en las tarjetas (registrado una sola vez)
+    if (!gridContainer._hasDelegatedEvents) {
+        gridContainer._hasDelegatedEvents = true;
 
-        card.addEventListener('mouseenter', () => {
+        gridContainer.addEventListener('mouseover', (e) => {
+            const card = e.target.closest('.top-country-card[data-country-id]');
+            if (!card) return;
+            const countryId = card.getAttribute('data-country-id');
             if (window.MapModule && countryId) {
                 window.MapModule.highlightCountry(countryId);
             }
         });
 
-        card.addEventListener('mouseleave', () => {
+        gridContainer.addEventListener('mouseout', (e) => {
+            const card = e.target.closest('.top-country-card[data-country-id]');
+            if (!card) return;
+            const relatedCard = e.relatedTarget ? e.relatedTarget.closest('.top-country-card[data-country-id]') : null;
+            if (relatedCard === card) return; // Sigue dentro de la misma tarjeta
+            const countryId = card.getAttribute('data-country-id');
             if (window.MapModule && countryId) {
                 window.MapModule.unhighlightCountry(countryId);
             }
         });
 
-        card.addEventListener('click', () => {
+        gridContainer.addEventListener('click', (e) => {
+            const card = e.target.closest('.top-country-card[data-country-id]');
+            if (!card) return;
+            const countryId = card.getAttribute('data-country-id');
             const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
             if (countryData && window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
                 window.SoundEngine.playBurpForCountry(countryData);
             }
         });
-    });
+    }
 }
 
 window.renderTopRanking = renderTopRanking;

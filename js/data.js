@@ -209,7 +209,7 @@ const CocaColaData = {
         const svgFallback = `<svg class="flag-placeholder-svg" viewBox="0 0 24 16" width="24" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 1v14M2 2h14l-2 4 2 4H2" stroke="rgba(255,255,255,0.4)" fill="rgba(255,255,255,0.1)"/></svg>`;
         const svgFallbackDataUri = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='1.5'%3E%3Cpath d='M2 1v14M2 2h14l-2 4 2 4H2' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E";
         if (!/^[a-z]{2}$/.test(code)) return svgFallback;
-        return `<img class="flag-img" src="https://flagcdn.com/w80/${code}.png" alt="Bandera" loading="lazy" onerror="this.onerror=null;this.src='${svgFallbackDataUri}'">`;
+        return `<img class="flag-img" src="https://flagcdn.com/w80/${code}.png" alt="Bandera" loading="lazy" decoding="async" width="24" height="16" onerror="this.onerror=null;this.src='${svgFallbackDataUri}'">`;
     },
 
     formatNumber: function (value, decimals = 0) {

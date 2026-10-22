@@ -279,37 +279,33 @@ body {
     max-height: 100%;
     display: block;
     margin: auto;
-    filter: drop-shadow(0 10px 32px rgba(0, 0, 0, 0.7));
 }
 
-/* --- Estilos SVG para cada país (Optimizado para 60fps) --- */
+/* --- Estilos SVG para cada país (Optimizado para 60+ FPS sin capas pesadas) --- */
 #world-map path.country-path {
     stroke: #181212;
     stroke-width: 0.65px;
     cursor: pointer;
     paint-order: stroke fill;
-    transition: fill 0.15s ease, stroke 0.15s ease, opacity 0.2s ease;
-    will-change: fill, opacity;
+    transition: opacity 0.15s ease;
 }
 
-/* Hover fluido sin sobrecarga de filtros */
+/* Hover fluido y reactivo sin filtros de rasterizado pesado */
 #world-map path.country-path.is-hovered {
-    fill: #3D2B2B !important;
+    fill: #443032 !important;
     stroke: #FFFFFF !important;
     stroke-width: 2px !important;
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.75));
 }
 
-/* Atenuación eficiente por aceleración de composición GPU */
+/* Atenuación eficiente */
 #world-map path.country-path.is-dimmed {
     opacity: 0.14 !important;
 }
 
 /* Resaltado de categoría en la leyenda */
 #world-map path.country-path.is-tier-highlighted {
-    stroke: #FFFFFF;
-    stroke-width: 1.8px;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
+    stroke: #FFFFFF !important;
+    stroke-width: 1.8px !important;
 }
 
 /* --- Barra de Leyenda de Consumo Integrada Flotante --- */
