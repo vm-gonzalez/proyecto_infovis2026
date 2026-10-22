@@ -338,13 +338,13 @@ const MapModule = {
             const isPerCapita = window.CocaColaData && window.CocaColaData.currentMetric === 'per_capita';
 
             if (continent === 'Todos') {
-                banner.innerHTML = `<span>Métrica: <strong>${isPerCapita ? 'Per Cápita (L/hab)' : 'Volumen Total (L/año)'}</strong> &bull; Pasa el cursor sobre cualquier país para contrastar volumen vs. hábito</span>`;
+                banner.innerHTML = `<span>Descubre qué países lideran el consumo &bull; Métrica activa: <strong>${isPerCapita ? 'Por Habitante (Per Cápita)' : 'Volumen Total Anual'}</strong> &bull; Pasa el cursor para ver detalles</span>`;
             } else {
                 const stats = window.CocaColaData ? window.CocaColaData.getContinentStats(continent) : null;
                 const statsText = stats && stats.count > 0
-                    ? ` &bull; <strong>${stats.count}</strong> países &bull; ${isPerCapita ? 'Promedio regional: <strong>' + stats.averagePerCapita + '</strong>' : 'Volumen regional: <strong>' + stats.totalFormatted + '</strong>'} &bull; Líder: <strong>${stats.topCountry?.name}</strong> (${stats.topCountry?.consumption})`
+                    ? ` &bull; <strong>${stats.count}</strong> países &bull; ${isPerCapita ? 'Promedio: <strong>' + stats.averagePerCapita + '</strong>' : 'Volumen total: <strong>' + stats.totalFormatted + '</strong>'} &bull; Mayor consumidor: <strong>${stats.topCountry?.name}</strong> (${stats.topCountry?.consumption})`
                     : ' &bull; Sin países reportados en la fuente';
-                banner.innerHTML = `<span>Continente: <strong>${continent}</strong> (${isPerCapita ? 'Per Cápita' : 'Volumen Total'})${statsText}</span>`;
+                banner.innerHTML = `<span>Países que más consumen en <strong>${continent}</strong> (${isPerCapita ? 'Per Cápita' : 'Volumen Total'})${statsText}</span>`;
             }
         }
 

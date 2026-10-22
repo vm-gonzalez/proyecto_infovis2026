@@ -47,18 +47,18 @@ function renderTopRanking(continent = 'Todos') {
     // Actualizar encabezados y subtítulos
     if (titleContainer) {
         titleContainer.innerHTML = isAll
-            ? `${trophySvg} <span>Ranking de Países con ${metricTitleName} (${count})</span>`
-            : `${trophySvg} <span>Ranking: ${metricTitleName} &bull; ${continent} (${count})</span>`;
+            ? `${trophySvg} <span>Países que Más Consumen Coca-Cola &bull; ${isPerCapita ? 'Por Habitante' : 'Volumen Total'} (${count})</span>`
+            : `${trophySvg} <span>Países que Más Consumen en ${continent} &bull; ${isPerCapita ? 'Por Habitante' : 'Volumen Total'} (${count})</span>`;
     }
 
     if (subtitleContainer) {
         subtitleContainer.innerHTML = isPerCapita
             ? (isAll
-                ? `<span>Los ${count} países con datos ordenados por consumo anual por persona (Litros por habitante)${scrollHint}</span>`
-                : `<span>Los ${count} países de <strong>${continent}</strong> ordenados por consumo anual por habitante${scrollHint}</span>`)
+                ? `<span>Ranking de las naciones que lideran el consumo de Coca-Cola por persona al año (Litros por habitante)${scrollHint}</span>`
+                : `<span>Ranking de los países de <strong>${continent}</strong> que más consumen Coca-Cola por persona al año${scrollHint}</span>`)
             : (isAll
-                ? `<span>Los ${count} países con datos ordenados por volumen total anual en litros${scrollHint}</span>`
-                : `<span>Los ${count} países de <strong>${continent}</strong> ordenados por volumen total anual${scrollHint}</span>`);
+                ? `<span>Ranking de las naciones con mayor volumen total de consumo de Coca-Cola al año en litros${scrollHint}</span>`
+                : `<span>Ranking de los países de <strong>${continent}</strong> con mayor volumen total de Coca-Cola al año${scrollHint}</span>`);
     }
 
     if (indicatorContainer) {
