@@ -116,87 +116,99 @@ body {
     min-height: 100dvh;
     overflow: hidden;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
     scroll-snap-align: start;
     background: radial-gradient(circle at 50% 50%, rgba(38, 20, 22, 0.75) 0%, rgba(12, 10, 10, 0.98) 100%);
 }
 
-/* Encabezado y Título Integrado Flotante dentro del mapa (Plegable lateralmente) */
+/* Encabezado y Título Integrado en la barra superior del mapa (sin solapar y siempre visible) */
 .integrated-map-header {
-    position: absolute;
-    top: 24px;
-    left: 28px;
+    position: relative;
     z-index: 10;
-    pointer-events: auto;
-    background: rgba(22, 16, 17, 0.88);
+    width: 100%;
+    background: rgba(20, 14, 15, 0.94);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--border-accent);
-    border-radius: 16px;
-    padding: 10px 14px 10px 18px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55), 0 0 20px rgba(244, 0, 9, 0.12);
-    max-width: min(540px, calc(100vw - 56px));
+    border-bottom: 1px solid var(--border-accent);
+    padding: 10px 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
     display: flex;
     align-items: center;
-    gap: 12px;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-/* Estado plegado hacia el lateral izquierdo */
-.integrated-map-header.is-collapsed {
-    transform: translateX(calc(-100% + 48px));
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
-}
-
-.integrated-map-header.is-collapsed .header-inner-content {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.integrated-map-header.is-collapsed .header-toggle-btn .toggle-icon-svg {
-    transform: rotate(180deg);
-}
-
-.header-inner-content {
-    transition: opacity 0.25s ease;
-    overflow: hidden;
-}
-
-/* Botón de alternancia de plegado */
-.header-toggle-btn {
-    background: var(--bg-surface-elevated);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-subtle);
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    justify-content: space-between;
+    gap: 20px;
     flex-shrink: 0;
-    transition: all 0.2s ease;
-    padding: 0;
-}
-
-.header-toggle-btn:hover {
-    background: rgba(244, 0, 9, 0.25);
-    border-color: var(--coca-red);
-    color: #FFFFFF;
-    box-shadow: 0 0 10px rgba(244, 0, 9, 0.4);
-    transform: scale(1.08);
-}
-
-.toggle-icon-svg {
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    display: block;
+    box-sizing: border-box;
 }
 
 .brand-wrapper {
     display: flex;
     align-items: center;
     gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Selector de Métrica: Segmented Switch (Per Cápita vs Volumen Total) */
+.metric-switch-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(14, 10, 11, 0.85);
+    padding: 4px 5px 4px 14px;
+    border: 1px solid var(--border-accent);
+    border-radius: 30px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 16px rgba(244, 0, 9, 0.12);
+    flex-shrink: 0;
+}
+
+.metric-switch-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.metric-switch-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px;
+    border-radius: 24px;
+}
+
+.metric-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.metric-toggle-btn:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.metric-toggle-btn.active {
+    background: var(--coca-red);
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(244, 0, 9, 0.5);
+}
+
+.metric-toggle-btn svg {
+    display: block;
+    flex-shrink: 0;
 }
 
 .brand-logo-bottle {
@@ -217,14 +229,17 @@ body {
     50% { transform: translateY(-4px) rotate(4deg); }
 }
 
+.brand-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
 .brand-titles h1 {
     font-size: 1.15rem;
     font-weight: 800;
     letter-spacing: -0.3px;
     margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
     line-height: 1.25;
 }
 
@@ -234,8 +249,7 @@ body {
 }
 
 .continent-info-banner {
-    margin-top: 4px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     line-height: 1.35;
 }
@@ -246,15 +260,14 @@ body {
 
 /* Área del Mapa a Pantalla Completa: escala fluida para adaptarse a cualquier resolución */
 .map-fullscreen-container {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
-    height: 100%;
+    flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(20px, 4vh, 50px) clamp(20px, 4vw, 60px);
+    padding: clamp(10px, 2vh, 24px) clamp(16px, 3vw, 40px) clamp(24px, 4vh, 40px);
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -266,37 +279,33 @@ body {
     max-height: 100%;
     display: block;
     margin: auto;
-    filter: drop-shadow(0 10px 32px rgba(0, 0, 0, 0.7));
 }
 
-/* --- Estilos SVG para cada país (Optimizado para 60fps) --- */
+/* --- Estilos SVG para cada país (Optimizado para 60+ FPS sin capas pesadas) --- */
 #world-map path.country-path {
     stroke: #181212;
     stroke-width: 0.65px;
     cursor: pointer;
     paint-order: stroke fill;
-    transition: fill 0.15s ease, stroke 0.15s ease, opacity 0.2s ease;
-    will-change: fill, opacity;
+    transition: opacity 0.15s ease;
 }
 
-/* Hover fluido sin sobrecarga de filtros */
+/* Hover fluido y reactivo sin filtros de rasterizado pesado */
 #world-map path.country-path.is-hovered {
-    fill: #3D2B2B !important;
+    fill: #443032 !important;
     stroke: #FFFFFF !important;
     stroke-width: 2px !important;
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.75));
 }
 
-/* Atenuación eficiente por aceleración de composición GPU */
+/* Atenuación eficiente */
 #world-map path.country-path.is-dimmed {
     opacity: 0.14 !important;
 }
 
 /* Resaltado de categoría en la leyenda */
 #world-map path.country-path.is-tier-highlighted {
-    stroke: #FFFFFF;
-    stroke-width: 1.8px;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
+    stroke: #FFFFFF !important;
+    stroke-width: 1.8px !important;
 }
 
 /* --- Barra de Leyenda de Consumo Integrada Flotante --- */
@@ -548,7 +557,7 @@ body {
 
 /* Ranking completo: carrusel/fila continua con scroll horizontal para todos los países */
 .top-countries-grid {
-    --visible-cards: 6;
+    --visible-cards: 5;
     --cards-gap: 14px;
     display: grid;
     grid-auto-flow: column;
@@ -567,7 +576,7 @@ body {
 
 .top-countries-grid > .top-country-card {
     scroll-snap-align: start;
-    min-width: 195px;
+    min-width: 220px;
 }
 
 .top-countries-grid::-webkit-scrollbar {
@@ -605,7 +614,7 @@ body {
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: 14px;
-    padding: 14px 14px;
+    padding: 14px 12px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -757,20 +766,21 @@ body {
     align-items: center;
     gap: 6px;
     font-size: 0.72rem;
-    padding-top: 6px;
+    padding-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     width: 100%;
     box-sizing: border-box;
+    min-width: 0;
 }
 
 .card-tier-pill {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.68rem;
+    font-size: 0.64rem;
     font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 10px;
+    padding: 2px 6px;
+    border-radius: 8px;
     border: 1px solid;
     white-space: nowrap;
     flex-shrink: 0;
@@ -786,13 +796,13 @@ body {
 
 .card-global-ref {
     color: var(--text-muted);
-    font-weight: 700;
-    font-size: 0.72rem;
+    font-weight: 600;
+    font-size: 0.69rem;
     white-space: nowrap;
     flex-shrink: 0;
     text-align: right;
     margin-left: auto;
-    padding-left: 4px;
+    letter-spacing: -0.15px;
 }
 
 /* --- Tooltip Flotante de Hover (Optimizado para GPU) --- */
@@ -826,8 +836,17 @@ body {
     font-weight: 600;
     padding: 3px 8px;
     border-radius: 10px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     margin-bottom: 8px;
+}
+
+.tooltip-tier-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
 }
 
 .tooltip-header {
@@ -875,13 +894,35 @@ body {
 
 .metric-item {
     text-align: center;
+    padding: 6px 4px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+}
+
+.metric-item.metric-item-active {
+    background: rgba(244, 0, 9, 0.18);
+    border-color: rgba(244, 0, 9, 0.55);
+    box-shadow: 0 0 12px rgba(244, 0, 9, 0.2);
+}
+
+.metric-item.metric-item-active .metric-value {
+    color: #FFFFFF;
+    text-shadow: 0 0 8px rgba(244, 0, 9, 0.4);
+}
+
+.metric-item.metric-item-active .metric-label {
+    color: #FFB3B6;
+    font-weight: 600;
 }
 
 .metric-value {
     display: block;
-    font-size: 1.1rem;
+    font-size: 1.02rem;
     font-weight: 800;
     color: #FFF;
+    letter-spacing: -0.3px;
 }
 
 .metric-label {
@@ -1013,10 +1054,13 @@ body {
         --visible-cards: 3;
     }
     .integrated-map-header {
-        top: 16px;
-        left: 16px;
-        padding: 10px 14px;
-        max-width: calc(100vw - 32px);
+        padding: 10px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .metric-switch-control {
+        align-self: flex-start;
+        padding: 3px 4px 3px 10px;
     }
     .brand-titles h1 {
         font-size: 1rem;
@@ -1042,10 +1086,28 @@ body {
         --visible-cards: 2;
     }
     .integrated-map-header {
-        top: 10px;
-        left: 10px;
         padding: 8px 12px;
-        border-radius: 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .metric-switch-control {
+        width: 100%;
+        justify-content: space-between;
+        box-sizing: border-box;
+    }
+    .metric-toggle-btn {
+        padding: 5px 10px;
+        font-size: 0.72rem;
+    }
+    .brand-wrapper {
+        gap: 10px;
+    }
+    .brand-titles h1 {
+        font-size: 0.92rem;
+    }
+    .continent-info-banner {
+        font-size: 0.7rem;
     }
     .legend-bar {
         display: none;
