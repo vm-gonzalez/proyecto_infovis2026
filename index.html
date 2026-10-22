@@ -25,10 +25,25 @@
                         </svg>
                     </span>
                     <div class="brand-titles">
-                        <h1><span class="coca-brand">Coca-Cola</span> &bull; Mapa Global de Consumo</h1>
+                        <h1><span class="coca-brand">Coca-Cola</span> &bull; Consumo Global: ¿Volumen o Hábito?</h1>
                         <div id="continent-banner-info" class="continent-info-banner">
-                            <span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas y audio</span>
+                            <span>Compara el <strong>consumo real por persona (Per Cápita)</strong> frente al <strong>volumen total del país</strong></span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Selector de Métrica: Per Cápita vs Volumen Total -->
+                <div class="metric-switch-control" role="group" aria-label="Cambiar métrica de consumo">
+                    <span class="metric-switch-label">Métrica:</span>
+                    <div class="metric-switch-buttons">
+                        <button type="button" class="metric-toggle-btn active" id="btn-metric-per-capita" data-metric="per_capita" title="Ver consumo por habitante al año (L/hab)">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span>Per Cápita (L/hab)</span>
+                        </button>
+                        <button type="button" class="metric-toggle-btn" id="btn-metric-total" data-metric="total" title="Ver volumen total anual del país (Litros totales)">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                            <span>Volumen Total (L/año)</span>
+                        </button>
                     </div>
                 </div>
             </header>
@@ -443,37 +458,37 @@
             </div>
 
             <!-- Barra de Leyenda Flotante (Escala Secuencial Monocromática Rojo Coca-Cola) -->
-            <div class="legend-bar">
+            <div class="legend-bar" id="map-legend">
                 <div class="legend-header">
-                    <span class="legend-title">Consumo Total Anual</span>
-                    <span class="legend-hint">Haz clic o pasa el cursor para filtrar el mapa</span>
+                    <span class="legend-title" id="legend-metric-title">Consumo Per Cápita</span>
+                    <span class="legend-hint" id="legend-metric-hint">Litros / habitante / año</span>
                 </div>
                 <div class="legend-ramp-wrapper">
-                    <div class="legend-tiers">
-                        <div class="legend-tier" data-tier="muy_bajo" title="100 millones de litros al año">
+                    <div class="legend-tiers" id="legend-tiers-container">
+                        <div class="legend-tier" data-tier="muy_bajo" title="Menos de 10 litros por persona al año">
                             <span class="color-swatch" style="background-color: var(--tier-muy-bajo);"></span>
                             <span class="tier-label">Muy Bajo</span>
-                            <span class="tier-range">(100 M L)</span>
+                            <span class="tier-range">(< 10 L)</span>
                         </div>
-                        <div class="legend-tier" data-tier="bajo" title="200 a 900 millones de litros al año">
+                        <div class="legend-tier" data-tier="bajo" title="10 a 29 litros por persona al año">
                             <span class="color-swatch" style="background-color: var(--tier-bajo);"></span>
                             <span class="tier-label">Bajo</span>
-                            <span class="tier-range">(200-900 M)</span>
+                            <span class="tier-range">(10-29 L)</span>
                         </div>
-                        <div class="legend-tier" data-tier="medio" title="1,0 a 1,9 miles de millones de litros al año">
+                        <div class="legend-tier" data-tier="medio" title="30 a 64 litros por persona al año">
                             <span class="color-swatch" style="background-color: var(--tier-medio);"></span>
                             <span class="tier-label">Medio</span>
-                            <span class="tier-range">(1,0-1,9 B)</span>
+                            <span class="tier-range">(30-64 L)</span>
                         </div>
-                        <div class="legend-tier" data-tier="alto" title="2,0 a 4,9 miles de millones de litros al año">
+                        <div class="legend-tier" data-tier="alto" title="65 a 109 litros por persona al año">
                             <span class="color-swatch" style="background-color: var(--tier-alto);"></span>
                             <span class="tier-label">Alto</span>
-                            <span class="tier-range">(2,0-4,9 B)</span>
+                            <span class="tier-range">(65-109 L)</span>
                         </div>
-                        <div class="legend-tier" data-tier="muy_alto" title="≥ 5,0 miles de millones de litros al año">
+                        <div class="legend-tier" data-tier="muy_alto" title="≥ 110 litros por persona al año">
                             <span class="color-swatch" style="background-color: var(--tier-muy-alto);"></span>
                             <span class="tier-label">Muy Alto</span>
-                            <span class="tier-range">(≥ 5,0 B L)</span>
+                            <span class="tier-range">(≥ 110 L)</span>
                         </div>
                         <div class="legend-divider"></div>
                         <div class="legend-tier tier-no-data" data-tier="sin_datos" title="Sin datos registrados">
@@ -542,8 +557,8 @@
                 <!-- Footer del ranking: Fuente de datos y enlace para volver al mapa -->
                 <div class="ranking-footer">
                     <p class="data-source-note">
-                        Fuente: World Population Review (2026), <em>Coca-Cola Consumption by Country</em>.
-                        Cifras de volumen total de consumo anual en litros (B L: miles de millones de litros / M L: millones de litros).
+                        Fuentes: World Population Review (2026), <em>Coca-Cola Consumption by Country</em> y División de Población de la ONU.
+                        Cifras comparativas de consumo per cápita (L/persona al año) y volumen total en litros (B L: miles de millones / M L: millones).
                         Países en gris oscuro: sin datos en la fuente.
                         <a href="https://worldpopulationreview.com/country-rankings/coca-cola-consumption-by-country" target="_blank" rel="noopener">Ver fuente original</a>
                     </p>

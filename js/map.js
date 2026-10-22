@@ -37,6 +37,82 @@ const MapModule = {
 
         // 4. Configurar interactividad de la leyenda
         this.setupLegendControls();
+
+        // 5. Configurar selector de métricas (Per Cápita vs Total)
+        this.setupMetricControls();
+
+        // 6. Sincronizar textos iniciales de la leyenda según la métrica activa
+        this.updateLegendUI();
+    },
+
+    setupMetricControls: function () {
+        const metricButtons = document.querySelectorAll('.metric-toggle-btn');
+        metricButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const metric = btn.getAttribute('data-metric');
+                if (metric) {
+                    this.setMetric(metric);
+                }
+            });
+        });
+    },
+
+    setMetric: function (metric) {
+        if (!window.CocaColaData) return;
+        if (window.CocaColaData.currentMetric === metric) return;
+
+        window.CocaColaData.setMetric(metric);
+
+        // Actualizar botones de la barra superior
+        document.querySelectorAll('.metric-toggle-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-metric') === metric);
+        });
+
+        // Actualizar todos los paths del mapa SVG con su nuevo nivel y color
+        const paths = this.svgElement.querySelectorAll('path.country-path');
+        paths.forEach(path => {
+            const countryId = path.getAttribute('data-country-id');
+            const countryData = window.CocaColaData.getCountry(countryId);
+            const level = countryData && countryData.level ? countryData.level : 'sin_datos';
+            path.setAttribute('data-level', level);
+            path.style.fill = window.CocaColaData.getColorByLevel(countryData?.level);
+        });
+
+        // Actualizar textos y rangos de la leyenda
+        this.updateLegendUI();
+
+        // Actualizar filtros aplicados (manteniendo continente o tier seleccionado)
+        this.applyFilters();
+
+        // Actualizar banner y ranking inferior
+        this.filterByContinent(this.activeContinent);
+    },
+
+    updateLegendUI: function () {
+        if (!window.CocaColaData) return;
+        const isPerCapita = (window.CocaColaData.currentMetric === 'per_capita');
+        const titleEl = document.getElementById('legend-metric-title');
+        const hintEl = document.getElementById('legend-metric-hint');
+
+        if (titleEl) {
+            titleEl.textContent = isPerCapita ? 'Consumo Per Cápita' : 'Consumo Total Anual';
+        }
+        if (hintEl) {
+            hintEl.textContent = isPerCapita ? 'Litros / habitante / año' : 'Litros anuales consumidos';
+        }
+
+        const tiers = window.CocaColaData.getTiers();
+        const legendItems = document.querySelectorAll('.legend-tier[data-tier]');
+        legendItems.forEach(item => {
+            const tierId = item.getAttribute('data-tier');
+            if (tierId === 'sin_datos') return;
+            const tierConfig = tiers[tierId];
+            if (tierConfig) {
+                const rangeEl = item.querySelector('.tier-range');
+                if (rangeEl) rangeEl.textContent = `(${tierConfig.range})`;
+                item.setAttribute('title', `${tierConfig.label} (${tierConfig.range})`);
+            }
+        });
     },
 
     setupCountryPaths: function () {
@@ -131,22 +207,22 @@ const MapModule = {
     },
 
     /**
-     * Muestra el Tooltip informativo de forma minimalista y concisa con el consumo total.
+     * Muestra el Tooltip informativo contrastando consumo per cápita y volumen total.
      */
     showTooltip: function (data) {
         if (!this.tooltipElement) return;
 
+        const isPerCapita = window.CocaColaData && window.CocaColaData.currentMetric === 'per_capita';
         const tier = window.CocaColaData ? window.CocaColaData.getTierConfig(data.level) : {};
-        const consumption = data.consumption || 'Sin datos';
-        const rankLabel = data.hasData ? `#${data.rank} a nivel mundial` : 'Sin ranking';
 
         const tierBadge = data.hasData ? `
             <div class="tooltip-tier-badge" style="background: ${tier.color}28; border: 1px solid ${tier.color}; color: #FFFFFF;">
-                ${tier.label} &bull; ${tier.range}
+                <span class="tooltip-tier-dot" style="background: ${tier.color};"></span>
+                <span>${tier.label} &bull; ${tier.range}</span>
             </div>
         ` : `
             <div class="tooltip-tier-badge" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted);">
-                Sin datos en la fuente
+                Sin datos reportados
             </div>
         `;
 
@@ -157,20 +233,20 @@ const MapModule = {
                 <span class="tooltip-flag">${flagContent}</span>
                 <div class="tooltip-titles">
                     <h3 class="tooltip-country-name">${data.name}</h3>
-                    <span class="tooltip-continent">${data.continent}</span>
+                    <span class="tooltip-continent">${data.continent}${data.populationFormatted ? ` &bull; ${data.populationFormatted}` : ''}</span>
                 </div>
             </div>
             
             ${tierBadge}
 
             <div class="tooltip-metrics">
-                <div class="metric-item">
-                    <span class="metric-value">${consumption}</span>
-                    <span class="metric-label">Consumo Total Anual</span>
+                <div class="metric-item ${isPerCapita ? 'metric-item-active' : ''}">
+                    <span class="metric-value">${data.consumptionPerCapita || 'Sin datos'}</span>
+                    <span class="metric-label">Per Cápita ${data.rankPerCapita ? '(#' + data.rankPerCapita + ')' : ''}</span>
                 </div>
-                <div class="metric-item">
-                    <span class="metric-value">${data.hasData ? '#' + data.rank : '--'}</span>
-                    <span class="metric-label">Ranking Global</span>
+                <div class="metric-item ${!isPerCapita ? 'metric-item-active' : ''}">
+                    <span class="metric-value">${data.consumptionTotal || 'Sin datos'}</span>
+                    <span class="metric-label">Total Anual ${data.rankTotal ? '(#' + data.rankTotal + ')' : ''}</span>
                 </div>
             </div>
 
@@ -259,18 +335,20 @@ const MapModule = {
 
         const banner = document.getElementById('continent-banner-info');
         if (banner) {
+            const isPerCapita = window.CocaColaData && window.CocaColaData.currentMetric === 'per_capita';
+
             if (continent === 'Todos') {
-                banner.innerHTML = `<span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas y reproducir audio</span>`;
+                banner.innerHTML = `<span>Métrica: <strong>${isPerCapita ? 'Per Cápita (L/hab)' : 'Volumen Total (L/año)'}</strong> &bull; Pasa el cursor sobre cualquier país para contrastar volumen vs. hábito</span>`;
             } else {
                 const stats = window.CocaColaData ? window.CocaColaData.getContinentStats(continent) : null;
                 const statsText = stats && stats.count > 0
-                    ? ` &bull; <strong>${stats.count}</strong> países reportados &bull; Consumo regional: <strong>${stats.totalFormatted}</strong> &bull; Mayor consumidor: <strong>${stats.topCountry?.name}</strong> (${stats.topCountry?.consumption})`
+                    ? ` &bull; <strong>${stats.count}</strong> países &bull; ${isPerCapita ? 'Promedio regional: <strong>' + stats.averagePerCapita + '</strong>' : 'Volumen regional: <strong>' + stats.totalFormatted + '</strong>'} &bull; Líder: <strong>${stats.topCountry?.name}</strong> (${stats.topCountry?.consumption})`
                     : ' &bull; Sin países reportados en la fuente';
-                banner.innerHTML = `<span>Continente: <strong>${continent}</strong>${statsText}</span>`;
+                banner.innerHTML = `<span>Continente: <strong>${continent}</strong> (${isPerCapita ? 'Per Cápita' : 'Volumen Total'})${statsText}</span>`;
             }
         }
 
-        // Coordinación analítica: Actualizar Top 6 del continente seleccionado
+        // Coordinación analítica: Actualizar Ranking del continente seleccionado
         if (typeof window.renderTopRanking === 'function') {
             window.renderTopRanking(continent);
         }

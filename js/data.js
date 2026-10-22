@@ -12,13 +12,39 @@
  */
 
 const CocaColaData = {
-    // Categorías de consumo total en litros (Escala Secuencial Monocromática Rojo Coca-Cola)
-    TIERS: {
+    // Métrica activa: 'per_capita' (por defecto) o 'total'
+    currentMetric: 'per_capita',
+
+    // Escala para Consumo Total en litros anuales
+    TIERS_TOTAL: {
         muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 5,0 B L',       color: '#F40009' },
         alto:     { id: 'alto',     label: 'Consumo Alto',     range: '2,0 - 4,9 B L',   color: '#CF131C' },
         medio:    { id: 'medio',    label: 'Consumo Medio',    range: '1,0 - 1,9 B L',   color: '#9E181F' },
         bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '200 - 900 M L',   color: '#66191E' },
-        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '100 M L',         color: '#3A1417' }
+        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '≤ 100 M L',       color: '#3A1417' }
+    },
+
+    // Escala para Consumo Per Cápita en litros por habitante al año
+    TIERS_PER_CAPITA: {
+        muy_alto: { id: 'muy_alto', label: 'Consumo Muy Alto', range: '≥ 110 L / hab',   color: '#F40009' },
+        alto:     { id: 'alto',     label: 'Consumo Alto',     range: '65 - 109 L / hab', color: '#CF131C' },
+        medio:    { id: 'medio',    label: 'Consumo Medio',    range: '30 - 64 L / hab',  color: '#9E181F' },
+        bajo:     { id: 'bajo',     label: 'Consumo Bajo',     range: '10 - 29 L / hab',  color: '#66191E' },
+        muy_bajo: { id: 'muy_bajo', label: 'Consumo Muy Bajo', range: '< 10 L / hab',     color: '#3A1417' }
+    },
+
+    get TIERS() {
+        return this.currentMetric === 'per_capita' ? this.TIERS_PER_CAPITA : this.TIERS_TOTAL;
+    },
+
+    getTiers: function () {
+        return this.TIERS;
+    },
+
+    setMetric: function (metric) {
+        if (metric !== 'per_capita' && metric !== 'total') return;
+        this.currentMetric = metric;
+        this._ranking = null;
     },
 
     countryNames: {
@@ -137,16 +163,42 @@ const CocaColaData = {
     },
 
     /**
-     * Clasifica el consumo en miles de millones de litros (litersBillions)
-     * en uno de los 5 niveles del choropleth (compatibles con SoundEngine).
+     * Clasifica el consumo según la métrica activa:
+     * - 'per_capita': Litros por persona al año (litersPerCapita)
+     * - 'total': Miles de millones de litros anuales (litersBillions)
+     * @param {number|Object} input Número o registro del país
      */
-    getLevel: function (litersBillions) {
-        if (!this.isValidNumber(litersBillions)) return null;
-        if (litersBillions >= 5.0) return 'muy_alto';
-        if (litersBillions >= 2.0) return 'alto';
-        if (litersBillions >= 1.0) return 'medio';
-        if (litersBillions >= 0.2) return 'bajo';
-        return 'muy_bajo';
+    getLevel: function (input) {
+        if (input == null) return null;
+        let perCapitaVal = null;
+        let totalVal = null;
+
+        if (typeof input === 'object') {
+            perCapitaVal = input.litersPerCapita;
+            totalVal = input.litersBillions;
+        } else if (typeof input === 'number') {
+            if (this.currentMetric === 'per_capita') {
+                perCapitaVal = input;
+            } else {
+                totalVal = input;
+            }
+        }
+
+        if (this.currentMetric === 'per_capita') {
+            if (!this.isValidNumber(perCapitaVal)) return null;
+            if (perCapitaVal >= 110.0) return 'muy_alto';
+            if (perCapitaVal >= 65.0)  return 'alto';
+            if (perCapitaVal >= 30.0)  return 'medio';
+            if (perCapitaVal >= 10.0)  return 'bajo';
+            return 'muy_bajo';
+        } else {
+            if (!this.isValidNumber(totalVal)) return null;
+            if (totalVal >= 5.0) return 'muy_alto';
+            if (totalVal >= 2.0) return 'alto';
+            if (totalVal >= 1.0) return 'medio';
+            if (totalVal >= 0.2) return 'bajo';
+            return 'muy_bajo';
+        }
     },
 
     /**
@@ -165,22 +217,31 @@ const CocaColaData = {
     },
 
     /**
-     * Códigos de los países con dato válido ordenados de mayor a menor consumo total.
+     * Códigos de los países con dato válido ordenados según la métrica activa
+     * (de mayor a menor per cápita o volumen total).
      */
-    getRanking: function () {
-        if (this._ranking) return this._ranking;
+    getRanking: function (metric = this.currentMetric) {
         const dataset = this.getDataset();
         if (!dataset || !dataset.countries) return [];
 
-        this._ranking = Object.keys(dataset.countries)
-            .filter(code => this.isValidNumber(dataset.countries[code]?.litersBillions))
-            .sort((a, b) => dataset.countries[a].rank - dataset.countries[b].rank);
-        return this._ranking;
+        const isPerCapita = (metric === 'per_capita');
+        return Object.keys(dataset.countries)
+            .filter(code => {
+                const c = dataset.countries[code];
+                return isPerCapita ? this.isValidNumber(c?.litersPerCapita) : this.isValidNumber(c?.litersBillions);
+            })
+            .sort((a, b) => {
+                const itemA = dataset.countries[a];
+                const itemB = dataset.countries[b];
+                return isPerCapita
+                    ? (itemA.rankPerCapita - itemB.rankPerCapita)
+                    : (itemA.rankTotal - itemB.rankTotal);
+            });
     },
 
     /**
-     * Resuelve el nombre oficial en español y el continente de cualquier país,
-     * junto con su consumo si el dataset lo incluye. NUNCA devuelve la abreviación ISO.
+     * Resuelve el nombre oficial en español, métricas duales (per cápita y total),
+     * población y comparativa analítica para cualquier país.
      */
     getCountry: function (code) {
         if (!code) return null;
@@ -197,7 +258,6 @@ const CocaColaData = {
             } catch (e) {}
         }
 
-        // Si aún así no estuviese, formatear nombre limpio (nunca sigla suelta)
         if (!fullName) {
             fullName = `País (${normalized.toUpperCase()})`;
         }
@@ -209,38 +269,75 @@ const CocaColaData = {
             continent: this.continentMapping[normalized] || 'Por definir'
         };
 
-        // 3. Buscar el consumo en el dataset
+        // 3. Buscar datos en el dataset
         const dataset = this.getDataset();
         const record = dataset?.countries?.[normalized];
 
-        if (!record || !this.isValidNumber(record.litersBillions)) {
+        if (!record || (!this.isValidNumber(record.litersBillions) && !this.isValidNumber(record.litersPerCapita))) {
             return {
                 ...base,
                 hasData: false,
                 rank: '--',
+                rankTotal: '--',
+                rankPerCapita: '--',
                 litersBillions: null,
                 litersTotal: null,
+                litersPerCapita: null,
+                population: null,
+                populationFormatted: 'Sin datos',
                 consumption: 'Sin datos',
                 consumptionFormatted: 'Sin datos',
+                consumptionTotal: 'Sin datos',
+                consumptionPerCapita: 'Sin datos',
                 level: null,
                 fact: 'Este país no figura en la lista de consumo reportada por World Population Review.'
             };
         }
 
-        const level = this.getLevel(record.litersBillions);
-        const formattedTotal = record.litersTotal ? this.formatNumber(record.litersTotal) + ' Litros' : record.consumption;
+        const isPerCapita = (this.currentMetric === 'per_capita');
+        const activeRank = isPerCapita ? record.rankPerCapita : record.rankTotal;
+        const activeConsumption = isPerCapita ? record.consumptionPerCapita : record.consumptionTotal;
+        const level = this.getLevel(record);
+        const formattedTotal = record.litersTotal ? this.formatNumber(record.litersTotal) + ' Litros' : record.consumptionTotal;
+
+        // Fact analítico que contrasta el volumen bruto con el hábito por habitante
+        let fact = '';
+        if (normalized === 'mx') {
+            fact = `México es líder de América en hábito de consumo: ${record.consumptionPerCapita} (#7 mundial) y 19,5 B L en volumen total (#2 mundial).`;
+        } else if (normalized === 'cl') {
+            fact = `Chile es el #1 indiscutido de Sudamérica por persona con ${record.consumptionPerCapita} (#10 mundial), superando a Brasil y Argentina.`;
+        } else if (normalized === 'us') {
+            fact = `EE.UU. lidera el volumen bruto global con 39,3 B L (#1 mundial) y mantiene un alto per cápita de ${record.consumptionPerCapita} (#9 mundial).`;
+        } else if (normalized === 'cn') {
+            fact = `China es #3 en volumen total (10,8 B L), pero cae al puesto #${record.rankPerCapita} per cápita (${record.consumptionPerCapita}) por su enorme población.`;
+        } else if (normalized === 'in') {
+            fact = `India consume 5,9 B L en total (#8 mundial), pero por habitante es casi insignificante (${record.consumptionPerCapita}, puesto #${record.rankPerCapita}).`;
+        } else if (['qa', 'sg', 'kw', 'ae'].includes(normalized)) {
+            fact = `Muy alto consumo individual (${record.consumptionPerCapita}) impulsado por altas temperaturas y hábitos de consumo sin bebidas alcohólicas.`;
+        } else if (isPerCapita) {
+            fact = `Consumo individual anual: ${record.consumptionPerCapita} (Puesto #${record.rankPerCapita} mundial). Volumen país: ${record.consumptionTotal} (#${record.rankTotal}).`;
+        } else {
+            fact = `Volumen total anual: ${record.consumptionTotal} (Puesto #${record.rankTotal} mundial). Consumo por persona: ${record.consumptionPerCapita} (#${record.rankPerCapita}).`;
+        }
 
         return {
             ...base,
             hasData: true,
-            rank: record.rank,
+            rank: activeRank,
+            rankTotal: record.rankTotal,
+            rankPerCapita: record.rankPerCapita,
             litersBillions: record.litersBillions,
             litersTotal: record.litersTotal,
-            consumption: record.consumption,
-            consumptionFormatted: record.consumption,
+            litersPerCapita: record.litersPerCapita,
+            population: record.population,
+            populationFormatted: record.populationFormatted,
+            consumption: activeConsumption,
+            consumptionFormatted: activeConsumption,
+            consumptionTotal: record.consumptionTotal,
+            consumptionPerCapita: record.consumptionPerCapita,
             litersTotalFormatted: formattedTotal,
             level: level,
-            fact: `Volumen total anual: ${record.consumption} (${formattedTotal}) según World Population Review 2026.`
+            fact: fact
         };
     },
 
@@ -254,9 +351,7 @@ const CocaColaData = {
     },
 
     /**
-     * Devuelve el Top de países ordenados por consumo.
-     * Por defecto retorna 6 países (o menos si el continente tiene menos).
-     * Si se especifica un continente (distinto a 'Todos'), filtra exclusivamente los países de ese continente.
+     * Devuelve el Top de países ordenados por la métrica activa.
      */
     getTopCountries: function (limit = 6, continent = 'Todos') {
         let codes = this.getRanking();
@@ -273,7 +368,7 @@ const CocaColaData = {
     },
 
     /**
-     * Calcula métricas analíticas agregadas para un continente o global.
+     * Calcula métricas analíticas agregadas para un continente o global según la métrica activa.
      */
     getContinentStats: function (continent = 'Todos') {
         const dataset = this.getDataset();
@@ -289,11 +384,19 @@ const CocaColaData = {
                 continent: continent,
                 count: 0,
                 totalFormatted: '0 L',
+                averagePerCapita: '0 L / hab',
                 topCountry: null
             };
         }
 
+        const isPerCapita = (this.currentMetric === 'per_capita');
+        const topCountry = this.getCountry(codes[0]);
+
         const totalBillions = codes.reduce((acc, code) => acc + (dataset.countries[code]?.litersBillions || 0), 0);
+        const totalPop = codes.reduce((acc, code) => acc + (dataset.countries[code]?.population || 0), 0);
+        const totalLiters = codes.reduce((acc, code) => acc + (dataset.countries[code]?.litersTotal || 0), 0);
+        const avgPerCapita = totalPop > 0 ? (totalLiters / totalPop) : 0;
+
         let totalFormatted = '';
         if (totalBillions >= 1.0) {
             totalFormatted = this.formatNumber(totalBillions, 1) + ' B L';
@@ -305,7 +408,8 @@ const CocaColaData = {
             continent: continent,
             count: codes.length,
             totalFormatted: totalFormatted,
-            topCountry: this.getCountry(codes[0])
+            averagePerCapita: this.formatNumber(avgPerCapita, 1) + ' L / hab',
+            topCountry: topCountry
         };
     }
 };
