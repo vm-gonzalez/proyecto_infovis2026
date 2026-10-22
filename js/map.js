@@ -117,39 +117,17 @@ const MapModule = {
         if (!countryId) return;
         const matchingPaths = this.svgElement.querySelectorAll(`path[data-country-id="${countryId}"]`);
         matchingPaths.forEach(p => p.classList.add('is-hovered'));
-
-        // Sincronizar resaltado con la tarjeta correspondiente en el Top 6 si está presente
-        const matchingCard = document.querySelector(`.top-country-card[data-country-id="${countryId}"]`);
-        if (matchingCard) {
-            matchingCard.classList.add('is-map-hovered');
-
-            // Desplazar el ranking horizontalmente si la tarjeta quedó fuera de vista
-            const grid = matchingCard.parentElement;
-            const cardLeft = matchingCard.getBoundingClientRect().left - grid.getBoundingClientRect().left + grid.scrollLeft;
-            const cardRight = cardLeft + matchingCard.offsetWidth;
-            if (cardLeft < grid.scrollLeft || cardRight > grid.scrollLeft + grid.clientWidth) {
-                grid.scrollTo({ left: cardLeft - (grid.clientWidth - matchingCard.offsetWidth) / 2 });
-            }
-        }
     },
 
     unhighlightCountry: function (countryId) {
         if (!countryId) return;
         const matchingPaths = this.svgElement.querySelectorAll(`path[data-country-id="${countryId}"]`);
         matchingPaths.forEach(p => p.classList.remove('is-hovered'));
-
-        const matchingCard = document.querySelector(`.top-country-card[data-country-id="${countryId}"]`);
-        if (matchingCard) {
-            matchingCard.classList.remove('is-map-hovered');
-        }
     },
 
     clearAllHighlights: function () {
         const hovered = this.svgElement.querySelectorAll('path.country-path.is-hovered');
         hovered.forEach(p => p.classList.remove('is-hovered'));
-
-        const hoveredCards = document.querySelectorAll('.top-country-card.is-map-hovered');
-        hoveredCards.forEach(c => c.classList.remove('is-map-hovered'));
     },
 
     /**

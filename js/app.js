@@ -14,32 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
         window.MapModule.init();
     }
 
-    // 2. Inicializar interacción de plegado/desplegado lateral del título
-    setupHeaderToggle();
-
-    // 3. Renderizar todos los países con scroll horizontal continuo (por defecto nivel mundial)
+    // 2. Renderizar todos los países con scroll horizontal continuo (por defecto nivel mundial, en Top 1)
     renderTopRanking('Todos');
 
-    // 4. Inicializar burbujas carbonatadas de fondo
+    // 3. Inicializar burbujas carbonatadas de fondo
     createCarbonationBubbles();
 });
-
-/**
- * Controla el plegado y desplegado lateral de la tarjeta de título sobre el mapa.
- */
-function setupHeaderToggle() {
-    const headerPanel = document.getElementById('map-header-panel');
-    const toggleBtn = document.getElementById('header-toggle-btn');
-    if (!headerPanel || !toggleBtn) return;
-
-    toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isCollapsed = headerPanel.classList.toggle('is-collapsed');
-        toggleBtn.setAttribute('aria-expanded', !isCollapsed);
-        toggleBtn.setAttribute('title', isCollapsed ? 'Desplegar título' : 'Plegar título');
-        toggleBtn.setAttribute('aria-label', isCollapsed ? 'Desplegar panel de título' : 'Plegar panel de título');
-    });
-}
 
 /**
  * Renderiza el ranking completo de países de la zona seleccionada, permitiendo scroll horizontal.

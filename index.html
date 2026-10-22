@@ -14,31 +14,23 @@
     <main class="app-viewport">
         <!-- PANTALLA 1: VISUALIZACIÓN COMPLETA DEL MAPA MUNDIAL (100dvh / Fullscreen) -->
         <section class="fullscreen-map-section" id="map-section">
-            <!-- Título Flotante Integrado directamente en el mapa (Plegable/Desplegable lateralmente) -->
+            <!-- Encabezado Superior Integrado de forma fija (sin solapar el mapa ni requerir plegado) -->
             <header class="integrated-map-header" id="map-header-panel">
-                <div class="header-inner-content">
-                    <div class="brand-wrapper">
-                        <span class="brand-logo-bottle" aria-hidden="true">
-                            <svg class="brand-bottle-svg" viewBox="0 0 24 24" width="28" height="28" fill="none">
-                                <path d="M9 2h6v2H9z" fill="#F40009"/>
-                                <path d="M10 4v2.5a4 4 0 0 1-2 3.5v8.5a3 3 0 0 0 3 3h2a3 3 0 0 0 3-3V10.5A4 4 0 0 1 14 7V4.5z" fill="#F40009"/>
-                                <line x1="8" y1="13.5" x2="16" y2="13.5" stroke="#FFFFFF" stroke-width="1.6"/>
-                            </svg>
-                        </span>
-                        <div class="brand-titles">
-                            <h1><span class="coca-brand">Coca-Cola</span> &bull; Mapa Global de Consumo</h1>
-                            <div id="continent-banner-info" class="continent-info-banner">
-                                <span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas y audio</span>
-                            </div>
+                <div class="brand-wrapper">
+                    <span class="brand-logo-bottle" aria-hidden="true">
+                        <svg class="brand-bottle-svg" viewBox="0 0 24 24" width="28" height="28" fill="none">
+                            <path d="M9 2h6v2H9z" fill="#F40009"/>
+                            <path d="M10 4v2.5a4 4 0 0 1-2 3.5v8.5a3 3 0 0 0 3 3h2a3 3 0 0 0 3-3V10.5A4 4 0 0 1 14 7V4.5z" fill="#F40009"/>
+                            <line x1="8" y1="13.5" x2="16" y2="13.5" stroke="#FFFFFF" stroke-width="1.6"/>
+                        </svg>
+                    </span>
+                    <div class="brand-titles">
+                        <h1><span class="coca-brand">Coca-Cola</span> &bull; Mapa Global de Consumo</h1>
+                        <div id="continent-banner-info" class="continent-info-banner">
+                            <span>Mostrando <strong>todos los continentes</strong> &bull; Pasa el cursor sobre un país para ver métricas y audio</span>
                         </div>
                     </div>
                 </div>
-                <!-- Botón de plegado/desplegado hacia el lateral -->
-                <button type="button" class="header-toggle-btn" id="header-toggle-btn" aria-label="Plegar panel de título" title="Plegar/Desplegar título" aria-expanded="true">
-                    <svg class="toggle-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                </button>
             </header>
 
             <!-- Contenedor del Mapa al 100% del viewport sin scroll -->
