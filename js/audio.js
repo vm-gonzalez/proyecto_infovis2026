@@ -2,6 +2,7 @@
  * ====================================================================
  * PROYECTO INFOVIS 2026 - VISUALIZACIÓN DE CONSUMO MUNDIAL DE COCA-COLA
  * Módulo de Audio y Sonido: Martín Concha
+ * + Puente de Fisicalización Arduino (Web Serial API - Entrega 2)
  * ====================================================================
  * Martín Concha es el encargado de implementar aquí la reproducción
  * y diseño sonoro de los eructos/chanchos.
@@ -11,6 +12,115 @@
  * - Debe ser más fuerte y largo si el país tiene un alto nivel de consumo.
  * - Debe ser más débil y corto si el país tiene un menor nivel de consumo.
  */
+
+const ArduinoBridge = {
+    port: null,
+    writer: null,
+    isConnected: false,
+
+    levelMap: {
+        muy_bajo: '1',
+        bajo: '2',
+        medio: '3',
+        alto: '4',
+        muy_alto: '5'
+    },
+
+    initUI: function () {
+        const btn = document.getElementById('btn-connect-arduino');
+        if (!btn) return;
+
+        btn.addEventListener('click', () => {
+            if (this.isConnected) {
+                this.disconnect();
+            } else {
+                this.connect();
+            }
+        });
+    },
+
+    connect: async function () {
+        if (!('serial' in navigator)) {
+            if (window.location.protocol === 'file:') {
+                alert('Para conectar el Arduino por USB, abre la página con Live Server (http://localhost o http://127.0.0.1) o desde GitHub Pages (https://), ya que Chrome bloquea el puerto USB en archivos file://.');
+            } else {
+                alert('Tu navegador no soporta Web Serial API. Por favor abre la página en Google Chrome o Microsoft Edge.');
+            }
+            return;
+        }
+
+        try {
+            this.port = await navigator.serial.requestPort();
+            await this.port.open({ baudRate: 9600 });
+
+            const textEncoder = new TextEncoderStream();
+            textEncoder.readable.pipeTo(this.port.writable);
+            this.writer = textEncoder.writable.getWriter();
+            this.isConnected = true;
+            this.updateButtonUI(true);
+
+            this.port.addEventListener('disconnect', () => {
+                this.cleanup();
+            });
+        } catch (err) {
+            console.warn('Conexión con Arduino cancelada o fallida:', err);
+            this.cleanup();
+        }
+    },
+
+    disconnect: async function () {
+        try {
+            if (this.writer) {
+                await this.writer.write('0');
+                this.writer.releaseLock();
+                this.writer = null;
+            }
+            if (this.port) {
+                await this.port.close();
+                this.port = null;
+            }
+        } catch (err) {
+            console.warn('Error al cerrar puerto Arduino:', err);
+        } finally {
+            this.cleanup();
+        }
+    },
+
+    cleanup: function () {
+        this.writer = null;
+        this.port = null;
+        this.isConnected = false;
+        this.updateButtonUI(false);
+    },
+
+    updateButtonUI: function (connected) {
+        const btn = document.getElementById('btn-connect-arduino');
+        const label = document.getElementById('arduino-btn-label');
+        if (!btn) return;
+
+        btn.classList.toggle('is-connected', connected);
+        if (label) {
+            label.textContent = connected ? 'Arduino Conectado' : 'Conectar Arduino';
+        }
+    },
+
+    sendCountryLevel: async function (level) {
+        if (!this.isConnected || !this.writer) return;
+        const code = this.levelMap[level] || '0';
+        try {
+            await this.writer.write(code);
+        } catch (err) {
+            console.warn('Error enviando datos al Arduino:', err);
+            this.cleanup();
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    ArduinoBridge.initUI();
+});
+
+window.ArduinoBridge = ArduinoBridge;
 
 const SoundEngine = {
     audio: null,
@@ -97,6 +207,11 @@ const SoundEngine = {
         const playPromise = this.audio.play();
         if (playPromise !== undefined) {
             playPromise.catch(() => {});
+        }
+
+        // Enviar nivel (1 a 5) en tiempo real al prototipo físico Arduino si está conectado
+        if (window.ArduinoBridge && typeof window.ArduinoBridge.sendCountryLevel === 'function') {
+            window.ArduinoBridge.sendCountryLevel(countryData.level);
         }
 
         const fadeDuration = 180;
