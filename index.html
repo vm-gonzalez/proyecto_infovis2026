@@ -32,19 +32,33 @@
                     </div>
                 </div>
 
-                <!-- Selector de Métrica: Per Cápita vs Volumen Total -->
-                <div class="metric-switch-control" role="group" aria-label="Cambiar métrica de consumo">
-                    <span class="metric-switch-label">Métrica:</span>
-                    <div class="metric-switch-buttons">
-                        <button type="button" class="metric-toggle-btn active" id="btn-metric-per-capita" data-metric="per_capita" title="Ver consumo por habitante al año (L/hab)">
-                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            <span>Per Cápita (L/hab)</span>
-                        </button>
-                        <button type="button" class="metric-toggle-btn" id="btn-metric-total" data-metric="total" title="Ver volumen total anual del país (Litros totales)">
-                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                            <span>Volumen Total (L/año)</span>
-                        </button>
+                <!-- Controles Superiores: Selector de Métrica + Conexión Arduino (Entrega 2) -->
+                <div class="header-controls-group">
+                    <div class="metric-switch-control" role="group" aria-label="Cambiar métrica de consumo">
+                        <span class="metric-switch-label">Métrica:</span>
+                        <div class="metric-switch-buttons">
+                            <button type="button" class="metric-toggle-btn active" id="btn-metric-per-capita" data-metric="per_capita" title="Ver consumo por habitante al año (L/hab)">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <span>Per Cápita (L/hab)</span>
+                            </button>
+                            <button type="button" class="metric-toggle-btn" id="btn-metric-total" data-metric="total" title="Ver volumen total anual del país (Litros totales)">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                                <span>Volumen Total (L/año)</span>
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- Botón de Conexión Física con Arduino (Web Serial API) -->
+                    <button type="button" class="arduino-connect-btn" id="btn-connect-arduino" title="Conectar prototipo físico Arduino por puerto USB (Chrome / Edge)">
+                        <span class="arduino-status-dot" id="arduino-status-dot" aria-hidden="true"></span>
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 2v5"/>
+                            <path d="M9 7h6v5a3 3 0 0 1-6 0V7z"/>
+                            <path d="M12 15v7"/>
+                            <path d="M10 4h4"/>
+                        </svg>
+                        <span id="arduino-btn-label">Conectar Arduino</span>
+                    </button>
                 </div>
             </header>
 

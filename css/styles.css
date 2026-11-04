@@ -148,6 +148,62 @@ body {
     min-width: 0;
 }
 
+/* Contenedor de controles superiores (Métrica + Arduino) */
+.header-controls-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* Botón Conectar Arduino (Web Serial API) */
+.arduino-connect-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(14, 10, 11, 0.88);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 8px 15px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+    flex-shrink: 0;
+}
+
+.arduino-connect-btn:hover {
+    color: #FFFFFF;
+    border-color: var(--coca-red);
+    background: rgba(244, 0, 9, 0.14);
+    box-shadow: 0 0 14px rgba(244, 0, 9, 0.28);
+}
+
+.arduino-connect-btn.is-connected {
+    color: #FFFFFF;
+    border-color: rgba(34, 197, 94, 0.65);
+    background: rgba(20, 83, 45, 0.35);
+    box-shadow: 0 0 14px rgba(34, 197, 94, 0.22);
+}
+
+.arduino-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #8E8282;
+    box-shadow: 0 0 6px rgba(142, 130, 130, 0.5);
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.arduino-connect-btn.is-connected .arduino-status-dot {
+    background-color: #22C55E;
+    box-shadow: 0 0 8px #22C55E;
+}
+
 /* Selector de Métrica: Segmented Switch (Per Cápita vs Volumen Total) */
 .metric-switch-control {
     display: flex;
