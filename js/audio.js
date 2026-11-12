@@ -2,7 +2,7 @@
  * ====================================================================
  * PROYECTO INFOVIS 2026 - VISUALIZACIÓN DE CONSUMO MUNDIAL DE COCA-COLA
  * Módulo de Audio y Sonido: Martín Concha
- * + Puente de Fisicalización Arduino (Web Serial API - Entrega 2)
+ * + Puente de Fisicalización Arduino (Web Serial API - Entrega 2 V2)
  * ====================================================================
  * Martín Concha es el encargado de implementar aquí la reproducción
  * y diseño sonoro de los eructos/chanchos.
@@ -11,12 +11,16 @@
  * - Al pasar el mouse por un país, se debe reproducir un sonido de eructo.
  * - Debe ser más fuerte y largo si el país tiene un alto nivel de consumo.
  * - Debe ser más débil y corto si el país tiene un menor nivel de consumo.
+ * - Al hacer clic en el botón de una tarjeta (o clic en un país del mapa),
+ *   se activa además la bomba de agua y los LEDs del prototipo Arduino.
  */
 
 const ArduinoBridge = {
     port: null,
     writer: null,
     isConnected: false,
+    isBusy: false,
+    busyTimer: null,
 
     levelMap: {
         muy_bajo: '1',
@@ -24,6 +28,14 @@ const ArduinoBridge = {
         medio: '3',
         alto: '4',
         muy_alto: '5'
+    },
+
+    durationsMs: {
+        muy_bajo: 410,
+        bajo: 550,
+        medio: 750,
+        alto: 1050,
+        muy_alto: 2000
     },
 
     initUI: function () {
@@ -87,32 +99,84 @@ const ArduinoBridge = {
     },
 
     cleanup: function () {
+        if (this.busyTimer) {
+            clearTimeout(this.busyTimer);
+            this.busyTimer = null;
+        }
+        this.isBusy = false;
         this.writer = null;
         this.port = null;
         this.isConnected = false;
         this.updateButtonUI(false);
     },
 
-    updateButtonUI: function (connected) {
+    updateButtonUI: function (connected, customLabel = null) {
         const btn = document.getElementById('btn-connect-arduino');
         const label = document.getElementById('arduino-btn-label');
         if (!btn) return;
 
         btn.classList.toggle('is-connected', connected);
         if (label) {
-            label.textContent = connected ? 'Arduino Conectado' : 'Conectar Arduino';
+            if (customLabel) {
+                label.textContent = customLabel;
+            } else {
+                label.textContent = connected ? 'Arduino Conectado' : 'Conectar Arduino';
+            }
         }
     },
 
     sendCountryLevel: async function (level) {
-        if (!this.isConnected || !this.writer) return;
+        if (!this.isConnected || !this.writer) return false;
         const code = this.levelMap[level] || '0';
         try {
             await this.writer.write(code);
+            return true;
         } catch (err) {
             console.warn('Error enviando datos al Arduino:', err);
             this.cleanup();
+            return false;
         }
+    },
+
+    /**
+     * Acción explícita por clic (en botón de tarjeta o clic en país del mapa):
+     * Reproduce el eructo y activa los LEDs + Bomba de agua en el Arduino.
+     */
+    dispenseForCountry: async function (countryData, triggerButtonEl = null) {
+        if (!countryData || !countryData.hasData) return;
+
+        // 1. Reproducir el sonido proporcional del país
+        if (window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
+            window.SoundEngine.playBurpForCountry(countryData, true);
+        }
+
+        // 2. Enviar nivel al Arduino (bomba + LEDs) si está conectado
+        const duration = this.durationsMs[countryData.level] || 800;
+
+        if (this.isConnected && this.writer) {
+            await this.sendCountryLevel(countryData.level);
+            this.updateButtonUI(true, `Bombeando: ${countryData.name}...`);
+        }
+
+        // 3. Feedback visual en el botón de la tarjeta presionada
+        if (triggerButtonEl) {
+            const originalHTML = triggerButtonEl.dataset.originalHtml || triggerButtonEl.innerHTML;
+            triggerButtonEl.dataset.originalHtml = originalHTML;
+            triggerButtonEl.classList.add('is-dispensing');
+            triggerButtonEl.innerHTML = `<span>💧 Dispensando (${(duration / 1000).toFixed(1)}s)...</span>`;
+
+            setTimeout(() => {
+                triggerButtonEl.classList.remove('is-dispensing');
+                triggerButtonEl.innerHTML = originalHTML;
+            }, duration);
+        }
+
+        if (this.busyTimer) clearTimeout(this.busyTimer);
+        this.busyTimer = setTimeout(() => {
+            if (this.isConnected) {
+                this.updateButtonUI(true);
+            }
+        }, duration);
     }
 };
 
@@ -152,14 +216,15 @@ const SoundEngine = {
     },
 
     /**
-     * Reproduce el efecto de sonido modulado por nivel de consumo.
-     * Reutiliza una única instancia de audio (evita fugas de memoria y decodificación repetida).
+     * Reproduce el efecto de sonido modulado por nivel de consumo (en hover o clic).
+     * Nota: El hover solo reproduce el audio; la bomba de agua se activa únicamente por clic
+     * mediante ArduinoBridge.dispenseForCountry() para evitar rebalses al mover el cursor.
      */
-    playBurpForCountry: function (countryData) {
+    playBurpForCountry: function (countryData, forceImmediate = false) {
         if (!countryData || !countryData.hasData) return;
 
         const now = Date.now();
-        if (now - this.lastPlayTime < this.cooldownMs) return;
+        if (!forceImmediate && now - this.lastPlayTime < this.cooldownMs) return;
         this.lastPlayTime = now;
 
         if (!this.audio) {
@@ -207,11 +272,6 @@ const SoundEngine = {
         const playPromise = this.audio.play();
         if (playPromise !== undefined) {
             playPromise.catch(() => {});
-        }
-
-        // Enviar nivel (1 a 5) en tiempo real al prototipo físico Arduino si está conectado
-        if (window.ArduinoBridge && typeof window.ArduinoBridge.sendCountryLevel === 'function') {
-            window.ArduinoBridge.sendCountryLevel(countryData.level);
         }
 
         const fadeDuration = 180;
