@@ -206,6 +206,19 @@ const MapModule = {
             this.hideTooltip();
             this.currentHoveredCountryId = null;
         });
+
+        // Clic explícito en un país del mapa para activar la maqueta Arduino (bomba + LEDs)
+        this.svgElement.addEventListener('click', (e) => {
+            const path = e.target.closest('path.country-path');
+            if (!path) return;
+            const countryId = path.getAttribute('data-country-id');
+            if (!countryId || countryId === 'desconocido') return;
+            const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
+            if (countryData && countryData.hasData && window.ArduinoBridge && typeof window.ArduinoBridge.dispenseForCountry === 'function') {
+                const matchingCardBtn = document.querySelector(`.card-dispense-btn[data-dispense-country="${countryId}"]`);
+                window.ArduinoBridge.dispenseForCountry(countryData, matchingCardBtn);
+            }
+        });
     },
 
     highlightCountry: function (countryId) {
@@ -272,6 +285,12 @@ const MapModule = {
             ${data.hasData && data.fact ? `
                 <div class="tooltip-fact">
                     <p>${data.fact}</p>
+                </div>
+            ` : ''}
+
+            ${data.hasData ? `
+                <div class="tooltip-arduino-hint">
+                    <span>💧 Haz clic en el país para dispensar en la maqueta</span>
                 </div>
             ` : ''}
         `;

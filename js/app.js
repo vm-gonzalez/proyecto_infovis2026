@@ -95,7 +95,7 @@ function renderTopRanking(continent = 'Todos') {
         const tierShortLabel = tierConfig.label ? tierConfig.label.replace('Consumo ', '') : 'Sin datos';
 
         return `
-            <div class="top-country-card rank-${country.regionalRank}" data-country-id="${country.id}" title="Haz clic o pasa el mouse para interactuar con ${country.name}">
+            <div class="top-country-card rank-${country.regionalRank}" data-country-id="${country.id}" title="Pasa el mouse para ubicar en el mapa o presiona Dispensar para activar la maqueta">
                 <div class="card-top-row">
                     <span class="card-rank-badge ${country.regionalRank <= 3 ? 'podium-' + country.regionalRank : ''}">
                         ${medalSvg ? `<span class="rank-medal">${medalSvg}</span>` : ''}
@@ -123,6 +123,13 @@ function renderTopRanking(continent = 'Todos') {
                     </span>
                     <span class="card-global-ref" title="${globalRankText}">${globalRankText}</span>
                 </div>
+
+                <button type="button" class="card-dispense-btn" data-dispense-country="${country.id}" title="Activar bomba de agua, LEDs y sonido para ${country.name}">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                    <span>Dispensar en Maqueta</span>
+                </button>
             </div>
         `;
     }).join('');
@@ -160,7 +167,11 @@ function renderTopRanking(continent = 'Todos') {
             if (!card) return;
             const countryId = card.getAttribute('data-country-id');
             const countryData = window.CocaColaData ? window.CocaColaData.getCountry(countryId) : null;
-            if (countryData && window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
+            const btn = card.querySelector('.card-dispense-btn');
+
+            if (countryData && window.ArduinoBridge && typeof window.ArduinoBridge.dispenseForCountry === 'function') {
+                window.ArduinoBridge.dispenseForCountry(countryData, btn);
+            } else if (countryData && window.SoundEngine && typeof window.SoundEngine.playBurpForCountry === 'function') {
                 window.SoundEngine.playBurpForCountry(countryData);
             }
         });
