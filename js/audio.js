@@ -116,6 +116,10 @@ const ArduinoBridge = {
         if (!btn) return;
 
         btn.classList.toggle('is-connected', connected);
+
+        // Estado visual para los íconos SVG
+        btn.dataset.state = !connected ? 'disconnected' : (customLabel ? 'dispensing' : 'connected');
+
         if (label) {
             if (customLabel) {
                 label.textContent = customLabel;

@@ -28,6 +28,13 @@
                         <h1>¿Cuáles son los países que más consumen <span class="coca-brand">Coca-Cola</span> en el mundo?</h1>
                         <div id="continent-banner-info" class="continent-info-banner">
                             <span>Descubre qué naciones lideran el ranking: mide el <strong>consumo por habitante (Per Cápita)</strong> o el <strong>volumen total del país</strong></span>
+                            <span class="dispense-hint-inline">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                                </svg>
+                                Haz click en el país para dispensar
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -49,16 +56,33 @@
                     </div>
 
                     <!-- Botón de Conexión Física con Arduino (Web Serial API) -->
-                    <button type="button" class="arduino-connect-btn" id="btn-connect-arduino" title="Conectar prototipo físico Arduino por puerto USB (Chrome / Edge)">
-                        <span class="arduino-status-dot" id="arduino-status-dot" aria-hidden="true"></span>
-                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M12 2v5"/>
-                            <path d="M9 7h6v5a3 3 0 0 1-6 0V7z"/>
-                            <path d="M12 15v7"/>
-                            <path d="M10 4h4"/>
-                        </svg>
-                        <span id="arduino-btn-label">Conectar Arduino</span>
-                    </button>
+                    <button type="button" class="arduino-connect-btn" id="btn-connect-arduino"
+                        data-state="disconnected"
+                        title="Conectar prototipo físico Arduino por puerto USB (Chrome / Edge)"
+                        aria-label="Conectar Arduino">
+                    <span class="arduino-status-dot" id="arduino-status-dot" aria-hidden="true"></span>
+
+                    <!-- Sensor: desconectado / conectado -->
+                    <svg class="ard-ico ico-sensor" viewBox="0 0 24 24" width="20" height="20" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="1.8" fill="currentColor"/>
+                        <path d="M8.6 8.6a4.8 4.8 0 0 0 0 6.8"/>
+                        <path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/>
+                        <path d="M5.8 5.8a8.8 8.8 0 0 0 0 12.4"/>
+                        <path d="M18.2 5.8a8.8 8.8 0 0 1 0 12.4"/>
+                    </svg>
+
+                    <!-- Boquilla con gotas cayendo: dispensando -->
+                    <svg class="ard-ico ico-pour" viewBox="0 0 24 24" width="20" height="20" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M8 3h8v3l-2 2h-4L8 6z"/>
+                        <path class="drop d1" d="M12 11c-1 1.4-1.5 2.1-1.5 2.8a1.5 1.5 0 0 0 3 0c0-.7-.5-1.4-1.5-2.8z" fill="currentColor" stroke="none"/>
+                        <path class="drop d2" d="M12 11c-1 1.4-1.5 2.1-1.5 2.8a1.5 1.5 0 0 0 3 0c0-.7-.5-1.4-1.5-2.8z" fill="currentColor" stroke="none"/>
+                        <path d="M6 21h12"/>
+                    </svg>
+
+                    <span id="arduino-btn-label" class="sr-only">Conectar Arduino</span>
+                </button>
                 </div>
             </header>
 
